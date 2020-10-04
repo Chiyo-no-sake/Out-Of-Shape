@@ -48,12 +48,6 @@ public class WorldGravity : MonoBehaviour
         if (dist != 0)
         {
             float gForce = gravityConstant * m1 * m2 / Mathf.Pow(dist, 2);
-            Debug.Log(gForce);
-            Debug.Log(gravityConstant);
-            Debug.Log(m1);
-            Debug.Log(m2);
-            Debug.Log(dist);
-
             gravityVector *= gForce;
             targetRb.AddForce(gravityVector);
         }
