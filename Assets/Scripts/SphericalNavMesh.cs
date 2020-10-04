@@ -32,7 +32,7 @@ public class SphericalNavMesh : MonoBehaviour
         Vector3 gravityVector = transform.localPosition - other.transform.localPosition;
         Triangle[] triangles = navMesh.getTriangles();
         List<Triangle> intersecting = new List<Triangle>();
-        
+
         foreach (var item in triangles)
         {
             List<Vector3> intersect = item.IntersectionsWith(other.transform.localPosition, gravityVector);
