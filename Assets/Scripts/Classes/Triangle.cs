@@ -4,66 +4,60 @@ using System.Collections.Generic;
 
 public class Triangle
 {
-    private Vector3[] vertices;
-    private SphereCollider collider;
-    private float collidingRadius;
+    public readonly int[] vertexIndeces;
+    private readonly float collidingRadius;
+    private readonly SphericalNavMesh father;
 
     public float enemySize = 1;
 
-    public Color color = Color.blue;
-    public Triangle(Vector3 vertex1, Vector3 vertex2, Vector3 vertex3)
+    public Triangle(int vertexIndex1, int vertexIndex2, int vertexIndex3, SphericalNavMesh father)
     {
-        vertices = new Vector3[3];
-        vertices[0] = vertex1;
-        vertices[1] = vertex2;
-        vertices[2] = vertex3;
-        collidingRadius = Vector3.Distance((vertices[1] + vertices[0]) / 2, getCenter());
+        this.father = father;
+        vertexIndeces = new int[3];
+        vertexIndeces[0] = vertexIndex1;
+        vertexIndeces[1] = vertexIndex2;
+        vertexIndeces[2] = vertexIndex3;
+        collidingRadius = Vector3.Distance((GetVertex(1) + GetVertex(0)) / 2f, GetCenter());
     }
 
-    public Vector3 getCenter()
+    public Vector3 GetCenter()
     {
-        return (vertices[0] + vertices[1] + vertices[2]) / 3f;
+        return (GetVertex(0) + GetVertex(1) + GetVertex(2)) / 3f;
     }
 
-    public Vector3[] getVertices()
+    public Vector3 GetVertex(int index)
     {
-        return vertices;
+        return father.GetVertex(vertexIndeces[index]);
     }
 
-    public bool isNeighbor(Triangle oth)
+    public bool IsNeighbor(Triangle oth)
     {
         int commonVertices = 0;
         for (int i = 0; i < 3; i++)
         {
-            for (int j = 0; j < 3; j++)
+            for (int j=0; j<3; j++)
             {
-                if (vertices[i] == oth.vertices[j])
+                if (GetVertex(i) == oth.GetVertex(j))
                     //there is a common vertex
                     commonVertices++;
             }
         }
 
-        return commonVertices == 2;
+        return commonVertices > 1;
     }
 
-    public void OnDrawGizmos()
+    public bool IsColliding(Vector3 point)
     {
-        Gizmos.color = color;
-        Gizmos.DrawSphere(getCenter(), collidingRadius);
-    }
-
-    public bool isColliding(Vector3 point)
-    {
-        return Vector3.Distance(point, getCenter()) - enemySize < collidingRadius;
+        return Vector3.Distance(point, GetCenter()) - enemySize < collidingRadius;
     }
 
     public List<Vector3> IntersectionsWith(Vector3 point, Vector3 direction)
     {
         List<Vector3> i = new List<Vector3>();
-        Vector3 edge1 = vertices[1] - vertices[0];
-        Vector3 edge2 = vertices[2] - vertices[0];
+        Vector3 edge1 = GetVertex(1) - GetVertex(0);
+        Vector3 edge2 = GetVertex(2) - GetVertex(0);
         Vector3 normal = Vector3.Cross(edge1, edge2);
-        float a = Vector3.Dot(vertices[0] - point, normal);
+        float a = Vector3.Dot(GetVertex(0) - point, normal);
         float b = Vector3.Dot(direction, normal);
         if (b == 0) return i;
 
@@ -73,23 +67,6 @@ public class Triangle
         return i;
     }
 
-    // Just some math down there
-    private static List<float> QuadraticSolve(float a, float b, float c)
-    {
-        // Local formula
-        float formula(int plusOrMinus, float d) => (-b + (plusOrMinus * Mathf.Sqrt(d))) / (2 * a);
-        float discriminant = b * b - 4 * a * c;
-
-        List<float> result = new List<float>();
-        if (discriminant >= 0)
-        {
-            result.Add(formula(1, discriminant));
-            if (discriminant > 0)
-                result.Add(formula(-1, discriminant));
-        }
-        return result;
-    }
-
     private bool PointInTriangle(Vector3 pt)
     {
         float d1, d2, d3;
@@ -97,13 +74,27 @@ public class Triangle
 
         float sign (Vector3 p1, Vector3 p2, Vector3 p3) => (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
 
-        d1 = sign(pt, vertices[0], vertices[1]);
-        d2 = sign(pt, vertices[1], vertices[2]);
-        d3 = sign(pt, vertices[2], vertices[0]);
+        d1 = sign(pt, GetVertex(0), GetVertex(1));
+        d2 = sign(pt, GetVertex(1), GetVertex(2));
+        d3 = sign(pt, GetVertex(2), GetVertex(0));
 
         has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
         has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
 
         return !(has_neg && has_pos);
+    }
+
+    public override bool Equals(object obj)
+    {
+        if(obj is Triangle triangle)
+        {
+            for(int i=0; i < 3; i++)
+            {
+                if (vertexIndeces[i] != triangle.vertexIndeces[i])
+                    return false;
+            }
+            return true;
+        }
+        return false;
     }
 }
