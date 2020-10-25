@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine.PlayerLoop;
+using UnityEditor.ShaderGraph.Internal;
 
 public class Node : IComparable<Node>
 {
@@ -64,7 +65,7 @@ public class NavActor : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        
     }
 
     // Update is called once per frame
@@ -75,11 +76,11 @@ public class NavActor : MonoBehaviour
 
     void FixedUpdate()
     {
-       //only for debug
-       //path.ForEach(n =>
-       //{
-       //    SphericalNavMesh.DebugVertexes(n.triangle, Color.cyan, 0.1f);
-       //});
+        //only for debug
+        //path.ForEach(n =>
+        //{
+        //    SphericalNavMesh.DebugVertexes(n.triangle, Color.cyan, 0.1f);
+        //});
     }
 
 
@@ -105,7 +106,7 @@ public class NavActor : MonoBehaviour
         }
 
         
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.1f);
         updateNavigationPath = true;
         
     }

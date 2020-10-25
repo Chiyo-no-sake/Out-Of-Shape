@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -38,18 +39,25 @@ public class WorldGravity : MonoBehaviour
 
     private void ApplyGravityTo(GameObject target)
     {
-        Rigidbody targetRb = target.GetComponent<Rigidbody>();
-        Vector3 gravityVector = Vector3.Normalize(_position - target.transform.localPosition);
-
-        float m1 = _rigidbody.mass;
-        float m2 = targetRb.mass;
-        Vector3 targetPos = target.transform.localPosition;
-        float dist = Vector3.Distance(_position, targetPos);
-        if (dist != 0)
+        try
         {
-            float gForce = gravityConstant * m1 * m2 / Mathf.Pow(dist, 2);
-            gravityVector *= gForce;
-            targetRb.AddForce(gravityVector);
+            Rigidbody targetRb = target.GetComponent<Rigidbody>();
+
+            Vector3 gravityVector = Vector3.Normalize(_position - target.transform.localPosition);
+
+            float m1 = _rigidbody.mass;
+            float m2 = targetRb.mass;
+            Vector3 targetPos = target.transform.localPosition;
+            float dist = Vector3.Distance(_position, targetPos);
+            if (dist != 0)
+            {
+                float gForce = gravityConstant * m1 * m2 / Mathf.Pow(dist, 2);
+                gravityVector *= gForce;
+                targetRb.AddForce(gravityVector);
+            }
+        } catch(MissingComponentException)
+        {
+            return;
         }
     }
 }
