@@ -7,13 +7,13 @@ public class SphericalNavMesh : MonoBehaviour
 {
     // Start is called before the first frame update
     public int detailLevel = 1;
-    public int radius = 1;
     public Collider coll;
     public float enemySize_TODO;
     public Mesh SphericalMesh;
 
     private Triangle[] faces;
     private Vector3[] vertices;
+    private int radius;
 
     void Start()
     {
@@ -69,7 +69,7 @@ public class SphericalNavMesh : MonoBehaviour
         vertices = new Vector3[SphericalMesh.vertexCount];
         for(int i=0; i< SphericalMesh.vertexCount; i++)
         {
-            vertices[i] = SphericalMesh.vertices[i] * radius;
+            vertices[i] = SphericalMesh.vertices[i] * (transform.parent.localScale.x/2);
         }
 
         // setup triangles pointers to vertices

@@ -10,8 +10,8 @@ public class WorldGravity : MonoBehaviour
     private Collider _atmosphere;
     private Vector3 _position;
 
-    private float gravityConstant = 0.07f;
     public float terrainDensity = 5.5f;
+    public float gravity = 9.81f;
 
     // Start is called before the first frame update
     void Start()
@@ -45,16 +45,11 @@ public class WorldGravity : MonoBehaviour
 
             Vector3 gravityVector = Vector3.Normalize(_position - target.transform.localPosition);
 
-            float m1 = _rigidbody.mass;
-            float m2 = targetRb.mass;
             Vector3 targetPos = target.transform.localPosition;
-            float dist = Vector3.Distance(_position, targetPos);
-            if (dist != 0)
-            {
-                float gForce = gravityConstant * m1 * m2 / Mathf.Pow(dist, 2);
-                gravityVector *= gForce;
-                targetRb.AddForce(gravityVector);
-            }
+
+            gravityVector *= gravity;
+            targetRb.AddForce(gravityVector, ForceMode.Acceleration);
+
         } catch(MissingComponentException)
         {
             return;

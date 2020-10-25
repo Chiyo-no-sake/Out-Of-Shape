@@ -1,40 +1,64 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.UIElements;
+
+enum WeaponState
+{
+    IDLE, CHARGING, SHOOTING, DISCHARGING
+}
 
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerBehaviour : MonoBehaviour
 {
-    public GameObject playerMesh;
+    // ############## Public #######################
+    // Movement and phisics
     public float acceleration = 2;
     public float maxSpeed = 10;
+    public GameObject playerMesh;
+    
+    // Shooting and Animation
     public GameObject projectileType;
     public float projectileSpeed;
     public float projectileLife;
-    public float fireRatio;
-    
+    public float minShootingDelta = 0.2f;
+    public float maxShootingDelta = 1;
+    public float maxAnimationSpeed = 10;
+    public float chargingSpeed = 5;
+
+    // ############### Private #####################
+    //physics and movement
     private Camera cam;
     private GameObject currentPlanet;
     private Rigidbody _rigidbody;
     private Vector3 _position;
-    private Vector3 _aimDirection;
-    private bool isShooting = false;
-    private float timer = 0;
-    private float animationSpeed = 0;
+
+    // shooting
+    private WeaponState weaponState = WeaponState.IDLE;
+    private float timer;
+    private float shootingDelta;
+    
+    // animations
     private Animator animator;
 
     // Start is called before the first frame update
     void Start()
     {
+        shootingDelta = maxShootingDelta;
+        timer = maxShootingDelta;
         _rigidbody = GetComponent<Rigidbody>();
-        Animator[] animators = GetComponentsInChildren<Animator>();
 
-        foreach (var anim in animators)
+        // search for animator for rotation
+        animator = transform.Find("PlayerMesh/playerMesh/RotationCenter").GetComponent<Animator>();
+        if(animator == null)
         {
-            if (anim.tag.Equals("PlayerRotationCenter"))
-                animator = anim;
+            Debug.LogError("Cannot find animator");
+        }
+        else
+        {
+            animator.speed = 0;
         }
 
         if(playerMesh == null)
@@ -46,11 +70,61 @@ public class PlayerBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        timer = (timer + Time.deltaTime);
+        timer += Time.deltaTime;
         _position = transform.localPosition;
         handleInput();
         preventExceedMaxSpeed();
         computeAim();
+        computeWeaponState();
+    }
+
+    private void computeWeaponState()
+    {
+        if (weaponState == WeaponState.IDLE)
+            if (Input.GetMouseButton(0))
+                weaponState = WeaponState.CHARGING;
+        if (weaponState == WeaponState.CHARGING)
+        {
+            chargeWeapon();
+            weaponShootWithDelta();
+
+            if (!Input.GetMouseButton(0))
+            {
+                weaponState = WeaponState.DISCHARGING;
+                return;
+            }
+        }
+        if (weaponState == WeaponState.DISCHARGING)
+        {
+            if (Input.GetMouseButton(0))
+            {
+                weaponState = WeaponState.CHARGING;
+                return;
+            }
+
+            dischargeWeapon();
+        }
+    }
+
+    private void weaponShootWithDelta()
+    {
+        if(timer >= shootingDelta)
+        {
+            shoot();
+            timer = 0;
+        }
+    }
+
+    private void chargeWeapon()
+    {
+        animator.speed = Mathf.Lerp(animator.speed, maxAnimationSpeed, chargingSpeed/2 * Time.deltaTime);
+        shootingDelta = Mathf.Lerp(shootingDelta, minShootingDelta, chargingSpeed * Time.deltaTime);
+    }
+
+    private void dischargeWeapon()
+    {
+        animator.speed = Mathf.Lerp(animator.speed, 0, chargingSpeed * Time.deltaTime);
+        shootingDelta = Mathf.Lerp(shootingDelta, maxShootingDelta, chargingSpeed * Time.deltaTime);
     }
 
     private void OnTriggerStay(Collider other)
@@ -74,11 +148,11 @@ public class PlayerBehaviour : MonoBehaviour
         //Debug.DrawRay(_position, toLookVector);
         playerMesh.transform.rotation = Quaternion.LookRotation(Vector3.Lerp(playerMesh.transform.forward, toLookVector, 2 * Time.deltaTime), transform.up);
 
-        _aimDirection = toLookVector.normalized;
     }
 
     private void shoot()
     {
+
         GameObject p = Instantiate(projectileType);
         ProjectileBehaviour pb = p.GetComponent<ProjectileBehaviour>();
 
@@ -111,22 +185,6 @@ public class PlayerBehaviour : MonoBehaviour
         }
         if(Input.GetKey(KeyCode.D)){
             accelVec.x += acceleration;
-        }
-
-        if (Input.GetMouseButton(0)) {
-            isShooting = true;
-        }
-        else {
-            isShooting = false;
-        }
-
-        if (isShooting)
-        {
-            if (timer > fireRatio)
-            {
-                timer = 0;
-                shoot();
-            }
         }
 
         _rigidbody.AddRelativeForce(accelVec * Time.deltaTime*10000, ForceMode.Force);

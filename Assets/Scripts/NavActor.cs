@@ -77,10 +77,10 @@ public class NavActor : MonoBehaviour
     void FixedUpdate()
     {
         //only for debug
-        //path.ForEach(n =>
-        //{
-        //    SphericalNavMesh.DebugVertexes(n.triangle, Color.cyan, 0.1f);
-        //});
+        path.ForEach(n =>
+        {
+            SphericalNavMesh.DebugVertexes(n.triangle, Color.cyan, 0.1f);
+        });
     }
 
 
