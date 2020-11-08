@@ -49,7 +49,7 @@ public class Node : IComparable<Node>
 }
 
 [RequireComponent(typeof(Collider))]
-public class NavActor : MonoBehaviour
+public abstract class NavActor : MonoBehaviour
 {
 
     [SerializeField] private GameObject target;
@@ -57,7 +57,10 @@ public class NavActor : MonoBehaviour
     private bool updateNavigationPath = true;
     private List<Node> path;
 
-    NavActor()
+    // to implement in child class
+    protected abstract void MoveToTarget(Vector3 targetPoint, Vector3 gravityVector);
+
+    public NavActor()
     {
         this.path = null;
     }
@@ -71,7 +74,11 @@ public class NavActor : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (path == null) return;
+        if (path.ElementAt(0) == null) return;
+
+        Vector3 gravityVector = navigationSurface.transform.localPosition - transform.localPosition;
+        this.MoveToTarget(path.ElementAt(0).triangle.GetCenter(), gravityVector);
     }
 
     void FixedUpdate()

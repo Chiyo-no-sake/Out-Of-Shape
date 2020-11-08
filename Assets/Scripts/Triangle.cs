@@ -43,7 +43,7 @@ public class Triangle
             }
         }
 
-        return commonVertices > 1;
+        return commonVertices >= 1;
     }
 
     public bool IsColliding(Vector3 point)
