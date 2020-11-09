@@ -6,54 +6,36 @@ using UnityEngine;
 public class SphericalNavMesh : MonoBehaviour
 {
     // Start is called before the first frame update
-    public int detailLevel = 1;
-    public Collider coll;
     public float enemySize_TODO;
     public Mesh SphericalMesh;
 
-    private Triangle[] faces;
     private Vector3[] vertices;
-    private int radius;
+    private Dictionary<Vector3, List<Triangle>> nearbyTMap;
+
 
     void Start()
     {
-        if (detailLevel < 0) detailLevel = 0;
-        if (detailLevel > 6) detailLevel = 6;
-
-        Collider coll = GetComponent<Collider>();
-        if (coll != null) this.coll = coll;
-        faces = ComputeTriangles();
+        ComputeMeshData();
     }
 
     void Update()
     {
     }
 
-    // TODO: implement NavActor interface (extends MonoBehaviour) and GenericEnemy script ( implements NavActor )
-    public Triangle GetCollidingTriangle(GameObject other)
+    public Vector3 GetNearestVertex(GameObject other)
     {
-        Vector3 gravityVector = transform.localPosition - other.transform.localPosition;
-        List<Triangle> intersecting = new List<Triangle>();
+        float? minDistance = null;
+        Vector3 nearest = vertices[0];
 
-        foreach (var item in faces)
+        foreach (var vertex in vertices)
         {
-            if (item != null)
+            float currDist = Vector3.Distance(other.transform.position, vertex);
+            if(minDistance == null || currDist < minDistance)
             {
-                List<Vector3> intersect = item.IntersectionsWith(other.transform.localPosition, gravityVector);
-                intersect.ForEach(i => intersecting.Add(item));
+                minDistance = currDist;
+                nearest = vertex;
             }
         }
-
-        float? minDistance = null;
-        Triangle nearest = null;
-
-        intersecting.ForEach((t) => {
-            float d = Vector3.Distance(other.transform.localPosition, t.GetCenter());
-            if(minDistance==null || minDistance > d){
-                minDistance = d;
-                nearest = t;
-            }
-        });
 
         return nearest;
     }
@@ -63,38 +45,58 @@ public class SphericalNavMesh : MonoBehaviour
         return vertices[index];
     }
 
-    private Triangle[] ComputeTriangles()
+    private void ComputeMeshData()
     {
-        // set up custom vertices snapped to world radius
+        // setup triangles array and NavPoint array sizes
+        int[] triangles = SphericalMesh.triangles;
+        Triangle[] faces = new Triangle[triangles.Length / 3];
+        this.nearbyTMap = new Dictionary<Vector3, List<Triangle>>();
+
+        // mutpliply each vertex to fit world size
         vertices = new Vector3[SphericalMesh.vertexCount];
         for(int i=0; i< SphericalMesh.vertexCount; i++)
         {
             vertices[i] = SphericalMesh.vertices[i] * (transform.parent.localScale.x/2);
         }
 
-        // setup triangles pointers to vertices
-        int[] triangles = SphericalMesh.triangles;
-        Triangle[] faces = new Triangle[triangles.Length/3];
-
-        // group by 3 the triangles and create a variable for each
+        // group by 3 the triangles and create a Triangle for each
+        // meanwhile, create navPoints and assign them their father triangles
         for (int i = 0; i*3 < triangles.Length - 2; i++)
         {
             int currTriangleStart = i * 3;
-            faces[i] = new Triangle(triangles[currTriangleStart], triangles[currTriangleStart+1], triangles[currTriangleStart+2], this);
-        }
+            Vector3 v1 = vertices[triangles[currTriangleStart]];
+            Vector3 v2 = vertices[triangles[currTriangleStart+1]];
+            Vector3 v3 = vertices[triangles[currTriangleStart + 2]];
 
-        return faces;
+            faces[i] = new Triangle(triangles[currTriangleStart], triangles[currTriangleStart+1], triangles[currTriangleStart+2], this);
+
+            // Add vertex and triangles to the map
+            addToNearby(v1, faces[i]);
+            addToNearby(v2, faces[i]);
+            addToNearby(v3, faces[i]);
+            
+        }
     }
 
-    public List<Triangle> GetNeighbors(Triangle t)
+    private void addToNearby(Vector3 vector, Triangle t)
     {
-        List<Triangle> neighbors = new List<Triangle>();
-        foreach(var triangle in faces){
-            if(triangle != null)
+        if (!nearbyTMap.ContainsKey(vector))
+        {
+            nearbyTMap.Add(vector, new List<Triangle>());
+        }
+
+        nearbyTMap[vector].Add(t);
+    }
+
+    public List<Vector3> GetNeighbors(Vector3 vertex)
+    {
+        List<Vector3> neighbors = new List<Vector3>();
+        foreach(var v in vertices){
+            if(vertex != null)
             {
-                if (triangle.IsNeighbor(t) && !triangle.Equals(t) && !neighbors.Contains(triangle))
+                if (areNeighbors(vertex, v) && vertex != v && !neighbors.Contains(v))
                 {
-                    neighbors.Add(triangle);
+                    neighbors.Add(v);
                 }
             }
         }
@@ -102,16 +104,27 @@ public class SphericalNavMesh : MonoBehaviour
         return neighbors;
     }
 
-    private void OnCollisionStay(Collision other)
+    public bool areNeighbors(Vector3 v1, Vector3 v2)
     {
-        // dispatch the collision event on triangles
-        //Triangle t = GetCollidingTriangle(other.gameObject);
+        // two vertex are neighbors if they have a triangle in common
+        List<Triangle> nearby1 = nearbyTMap[v1];
+        List<Triangle> nearby2 = nearbyTMap[v2];
 
-        //DebugVertexes(t, Color.blue, 1);
-        //foreach (var n in GetNeighbors(t))
-        //{
-        //    DebugVertexes(n, Color.green, 1);
-        //}
+        foreach(var t in nearby1)
+        {
+            if (nearby2.Contains(t))
+                return true;
+        }
+
+        return false;
+    }
+
+    public static void DebugPath(Vector3[] vertices, Color c, float duration)
+    {
+        for(int i=0; i<vertices.Length -1; i++)
+        {
+            Debug.DrawLine(vertices[i], vertices[i + 1], c, duration);
+        }
     }
 
     public static void DebugVertexes(Triangle t, Color c, float duration)

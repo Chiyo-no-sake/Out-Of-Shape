@@ -11,14 +11,15 @@ public class Node : IComparable<Node>
 {
 
     public Node parent;
-    public Triangle triangle;
+    public Vector3 vertex;
+    public Triangle[] fathers;
     public float g; // Distance from start to this
     public float h; // Distance from this to end (circa)
 
-    public Node(Node parent, Triangle thisNode, float h)
+    public Node(Node parent, Vector3 thisVertex, float h)
     {
         this.parent = parent;
-        this.triangle = thisNode;
+        this.vertex = thisVertex;
         this.h = h;
         if (parent == null)
             this.g = 0;
@@ -41,7 +42,7 @@ public class Node : IComparable<Node>
 
         if (obj != null && obj is Node node)
         {
-            return node.triangle.Equals(this.triangle);
+            return node.vertex.Equals(this.vertex);
         }
 
         return false;
@@ -52,10 +53,12 @@ public class Node : IComparable<Node>
 public abstract class NavActor : MonoBehaviour
 {
 
+    [SerializeField] private float refreshDelay = 0.5f;
     [SerializeField] private GameObject target;
     private SphericalNavMesh navigationSurface;
     private bool updateNavigationPath = true;
     private List<Node> path;
+    private int pathStepIndex;
 
     // to implement in child class
     protected abstract void MoveToTarget(Vector3 targetPoint, Vector3 gravityVector);
@@ -78,16 +81,26 @@ public abstract class NavActor : MonoBehaviour
         if (path.ElementAt(0) == null) return;
 
         Vector3 gravityVector = navigationSurface.transform.localPosition - transform.localPosition;
-        this.MoveToTarget(path.ElementAt(0).triangle.GetCenter(), gravityVector);
+
+        Vector3 currVertex = navigationSurface.GetNearestVertex(this.gameObject);
+
+        if(path.ElementAt(pathStepIndex).vertex == currVertex)
+            ++pathStepIndex;
+        
+        this.MoveToTarget(path.ElementAt(pathStepIndex).vertex, gravityVector);
     }
 
     void FixedUpdate()
     {
+        List<Vector3> vertices = new List<Vector3>();
         //only for debug
         path.ForEach(n =>
         {
-            SphericalNavMesh.DebugVertexes(n.triangle, Color.cyan, 0.1f);
+            vertices.Add(n.vertex);
         });
+
+        SphericalNavMesh.DebugPath(vertices.ToArray(), Color.cyan, this.refreshDelay);
+
     }
 
 
@@ -97,23 +110,26 @@ public abstract class NavActor : MonoBehaviour
         updateNavigationPath = false;
         navigationSurface = other.gameObject.GetComponent<SphericalNavMesh>();
 
-        Triangle firstTriangle = navigationSurface.GetCollidingTriangle(this.gameObject);
-        Triangle lastTriangle = navigationSurface.GetCollidingTriangle(target);
+        Vector3 first = navigationSurface.GetNearestVertex(this.gameObject);
+        Vector3 last = navigationSurface.GetNearestVertex(target);
 
-        if (firstTriangle != null && lastTriangle != null)
+        if (first != null && last != null)
         {
-            Vector3 initialPos = firstTriangle.GetCenter();
-            Vector3 endPos = lastTriangle.GetCenter();
+            Vector3 initialPos = first;
+            Vector3 endPos = last;
             float initDistance = Vector3.Distance(initialPos, endPos);
 
-            Node start = new Node(null, firstTriangle, initDistance);
-            Node end = new Node(null, lastTriangle, 0);
+            Node start = new Node(null, first, initDistance);
+            Node end = new Node(null, last, 0);
 
-            Task.Factory.StartNew(() => path = CreatePath(start, end));
+            Task.Factory.StartNew(() => {
+                path = CreatePath(start, end);
+                pathStepIndex = 0;
+            });
         }
 
         
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(this.refreshDelay);
         updateNavigationPath = true;
         
     }
@@ -146,7 +162,7 @@ public abstract class NavActor : MonoBehaviour
     // return null if no path exists
     private Node GetLast(Node first, Node last)
     {
-        Vector3 endPos = last.triangle.GetCenter();
+        Vector3 endPos = last.vertex;
 
         //Debug.Log("A* start");
         List<Node> closedList = new List<Node>();
@@ -169,13 +185,14 @@ public abstract class NavActor : MonoBehaviour
             }
 
             // get all current neighbors
-            List<Triangle> neighbors = navigationSurface.GetNeighbors(current.triangle);
+            List<Vector3> neighbors = navigationSurface.GetNeighbors(current.vertex);
 
             // for each neighbor
             foreach(var t in neighbors)
             {
                 // create the corresponding node
-                Vector3 currPos = t.GetCenter();
+                // TODO set traversable accordingly
+                Vector3 currPos = t;
                 float distanceToEnd = Vector3.Distance(currPos, endPos);
                 Node n = new Node(current, t, distanceToEnd);
 
@@ -185,7 +202,7 @@ public abstract class NavActor : MonoBehaviour
                     openList.Add(n);
                 else
                 {
-                    Node inList = openList.Find(node => node.triangle.Equals(n.triangle));
+                    Node inList = openList.Find(node => node.vertex == n.vertex);
                     // t is already in the openList.
                     // check if using current as his parent makes it a better path member
                     // i.e. check:
