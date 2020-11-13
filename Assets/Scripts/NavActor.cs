@@ -4,8 +4,6 @@ using System;
 using UnityEngine;
 using System.Linq;
 using System.Threading.Tasks;
-using UnityEngine.PlayerLoop;
-using UnityEditor.ShaderGraph.Internal;
 
 public class Node : IComparable<Node>
 {
@@ -50,68 +48,66 @@ public class Node : IComparable<Node>
 }
 
 [RequireComponent(typeof(Collider))]
-public abstract class NavActor : MonoBehaviour
+public abstract class NavActor : Actor
 {
 
     [SerializeField] private float refreshDelay = 0.5f;
     [SerializeField] private GameObject target;
-    private SphericalNavMesh navigationSurface;
     private bool updateNavigationPath = true;
+    private SphericalNavMesh navSurface;
     private List<Node> path;
     private int pathStepIndex;
 
     // to implement in child class
-    protected abstract void MoveToTarget(Vector3 targetPoint, Vector3 gravityVector);
 
     public NavActor()
     {
         this.path = null;
     }
 
-    // Start is called before the first frame update
-    void Start()
+    public new void Update()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (path == null) return;
-        if (path.ElementAt(0) == null) return;
-
-        Vector3 gravityVector = navigationSurface.transform.localPosition - transform.localPosition;
-
-        Vector3 currVertex = navigationSurface.GetNearestVertex(this.gameObject);
-
-        if(path.ElementAt(pathStepIndex).vertex == currVertex)
-            ++pathStepIndex;
-        
-        this.MoveToTarget(path.ElementAt(pathStepIndex).vertex, gravityVector);
-    }
-
-    void FixedUpdate()
-    {
-        List<Vector3> vertices = new List<Vector3>();
+        base.Update();
+        //List<Vector3> vertices = new List<Vector3>();
         //only for debug
-        path.ForEach(n =>
-        {
-            vertices.Add(n.vertex);
-        });
+        //if(path != null)
+        //path.ForEach(n =>
+        //{
+        //    vertices.Add(n.vertex);
+        //});
 
-        SphericalNavMesh.DebugPath(vertices.ToArray(), Color.cyan, this.refreshDelay);
+        //SphericalNavMesh.DebugPath(vertices.ToArray(), Color.cyan, this.refreshDelay);
 
+    }
+
+    public List<Node> getPath()
+    {
+        return this.path;
+    }
+
+    public Node GetNextPathPoint()
+    {
+        if (pathStepIndex == this.path.Count) return new Node(null, target.transform.position, 0);
+        return this.path.ElementAt(pathStepIndex);
+    }
+
+    public void UpdateNextPathPoint()
+    {
+        Vector3 currVertex = navSurface.GetNearestVertex(this.gameObject);
+        if (path.ElementAt(pathStepIndex).vertex == currVertex)
+            ++pathStepIndex;
     }
 
 
     //delay between fresh starts of the path-seeking algorithm
-    IEnumerator delayedCollision(Collision other)
+    IEnumerator DelayedCollision(Collision other)
     {
         updateNavigationPath = false;
-        navigationSurface = other.gameObject.GetComponent<SphericalNavMesh>();
+        currentPlanet = other.gameObject;
+        navSurface = currentPlanet.GetComponent<SphericalNavMesh>();
 
-        Vector3 first = navigationSurface.GetNearestVertex(this.gameObject);
-        Vector3 last = navigationSurface.GetNearestVertex(target);
+        Vector3 first = navSurface.GetNearestVertex(this.gameObject);
+        Vector3 last = navSurface.GetNearestVertex(target);
 
         if (first != null && last != null)
         {
@@ -185,7 +181,7 @@ public abstract class NavActor : MonoBehaviour
             }
 
             // get all current neighbors
-            List<Vector3> neighbors = navigationSurface.GetNeighbors(current.vertex);
+            List<Vector3> neighbors = navSurface.GetNeighbors(current.vertex);
 
             // for each neighbor
             foreach(var t in neighbors)
@@ -241,21 +237,30 @@ public abstract class NavActor : MonoBehaviour
         return cheapest;
     }
 
-    private void OnCollisionStay(Collision other)
+    protected void OnCollisionStay(Collision other)
     { 
         if (other.gameObject.CompareTag("Ground"))
         {
             if (updateNavigationPath)
             {
-                StartCoroutine("delayedCollision", other);
+                StartCoroutine("DelayedCollision", other);
             }
         }
         else
         {
             Debug.Log("Colliding with non ground");
         }
-        
 
+    }
+
+    protected void OnCollisionEnter(Collision collision)
+    {
+        
+    }
+
+    protected void OnCollisionExit(Collision collision)
+    {
+        
     }
 
 }

@@ -19,8 +19,6 @@ public class WorldGravity : MonoBehaviour
         _rigidbody = GetComponentsInChildren<Rigidbody>()[0];
         _atmosphere = GetComponent<Collider>();
         _position = transform.localPosition;
-
-        _rigidbody.mass = 4 * Mathf.PI * Mathf.Pow(transform.GetChild(0).transform.localScale.x, 2) * terrainDensity;
     }
 
     // Update is called once per frame

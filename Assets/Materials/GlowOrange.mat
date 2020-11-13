@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: GlowRed
+  m_Name: GlowOrange
   m_Shader: {fileID: -6465566751694194690, guid: e6189af66a5e4da438080f1590c99962, type: 3}
   m_ShaderKeywords: _EMISSION
   m_LightmapFlags: 2
@@ -90,12 +90,12 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - Color_3E6D8F9D: {r: 1, g: 0.038367633, b: 0, a: 0}
+    - Color_3E6D8F9D: {r: 1, g: 0.801486, b: 0, a: 0}
     - Color_548374DF: {r: 1, g: 1, b: 1, a: 0}
-    - Color_ADFA812F: {r: 1, g: 0.2688679, b: 0.32721794, a: 0}
+    - Color_ADFA812F: {r: 1, g: 0.4738788, b: 0, a: 0}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 0, b: 0, a: 1}
-    - _EmissionColor: {r: 1, g: 0, b: 0.07817793, a: 1}
+    - _EmissionColor: {r: 1, g: 0.23921569, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &2389567966917335317

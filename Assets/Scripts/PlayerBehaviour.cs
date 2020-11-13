@@ -11,27 +11,26 @@ enum WeaponState
 
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerBehaviour : MonoBehaviour
+public class PlayerBehaviour : WorldEntity
 {
-    // ############## Public #######################
+    // ############## Serial #######################
     // Movement and phisics
-    public float acceleration = 2;
-    public float maxSpeed = 10;
-    public GameObject playerMesh;
+    [SerializeField] private float acceleration = 2;
+    [SerializeField] private float maxSpeed = 10;
+    [SerializeField] private GameObject playerMesh;
     
     // Shooting and Animation
-    public GameObject projectileType;
-    public float projectileSpeed;
-    public float projectileLife;
-    public float minShootingDelta = 0.2f;
-    public float maxShootingDelta = 1;
-    public float maxAnimationSpeed = 10;
-    public float chargingSpeed = 5;
+    [SerializeField] private GameObject projectileType;
+    [SerializeField] private float projectileSpeed;
+    [SerializeField] private float projectileLife;
+    [SerializeField] private float minShootingDelta = 0.2f;
+    [SerializeField] private float maxShootingDelta = 1;
+    [SerializeField] private float maxAnimationSpeed = 10;
+    [SerializeField] private float chargingSpeed = 5;
 
     // ############### Private #####################
     //physics and movement
     private Camera cam;
-    private GameObject currentPlanet;
     private Rigidbody _rigidbody;
     private Vector3 _position;
 
@@ -132,7 +131,7 @@ public class PlayerBehaviour : MonoBehaviour
         if (other.tag == "Atmosphere")
         {
             currentPlanet = other.gameObject;
-            applyRotation(currentPlanet);
+            applyRotation();
         }
     }
 
@@ -166,9 +165,9 @@ public class PlayerBehaviour : MonoBehaviour
     }
 
 
-    private void applyRotation(GameObject atmosphereOwner)
+    private void applyRotation()
     {
-        Vector3 gravityVector = _position - atmosphereOwner.transform.localPosition;
+        Vector3 gravityVector = _position - currentPlanet.transform.localPosition;
         transform.localRotation = Quaternion.LookRotation(Vector3.Cross(-gravityVector, transform.right), gravityVector);
     }
 

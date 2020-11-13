@@ -18,9 +18,9 @@ TagManager:
   - 
   - 
   - PostProcessing
-  - 
-  - 
-  - 
+  - Entities
+  - World
+  - Walls
   - 
   - 
   - 
