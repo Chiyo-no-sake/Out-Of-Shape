@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 
-public abstract class Actor: WorldEntity
+public abstract class Actor: LivingEntity
 {
     protected abstract void StepTowardsTarget();
     protected abstract bool IsTargetReached();
