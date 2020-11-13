@@ -10,7 +10,6 @@ public class Node : IComparable<Node>
 
     public Node parent;
     public Vector3 vertex;
-    public Triangle[] fathers;
     public float g; // Distance from start to this
     public float h; // Distance from this to end (circa)
 
@@ -53,6 +52,7 @@ public abstract class NavActor : Actor
 
     [SerializeField] private float refreshDelay = 0.5f;
     [SerializeField] private GameObject target;
+
     private bool updateNavigationPath = true;
     private SphericalNavMesh navSurface;
     private List<Node> path;
@@ -64,19 +64,19 @@ public abstract class NavActor : Actor
     {
         this.path = null;
     }
-
+    
     public new void Update()
     {
         base.Update();
-        //List<Vector3> vertices = new List<Vector3>();
+        List<Vector3> vertices = new List<Vector3>();
         //only for debug
-        //if(path != null)
-        //path.ForEach(n =>
-        //{
-        //    vertices.Add(n.vertex);
-        //});
+        if (path != null)
+                path.ForEach(n =>
+                {
+                    vertices.Add(n.vertex);
+                });
 
-        //SphericalNavMesh.DebugPath(vertices.ToArray(), Color.cyan, this.refreshDelay);
+        SphericalNavMesh.DebugPath(vertices.ToArray(), Color.cyan, this.refreshDelay);
 
     }
 
@@ -192,9 +192,9 @@ public abstract class NavActor : Actor
                 float distanceToEnd = Vector3.Distance(currPos, endPos);
                 Node n = new Node(current, t, distanceToEnd);
 
-                if (closedList.Contains(n))
+                if (closedList.Contains(n) || !navSurface.isTraversable(n.vertex))
                     continue;
-                if (!openList.Contains(n))
+                if ((!openList.Contains(n)))
                     openList.Add(n);
                 else
                 {
@@ -245,10 +245,6 @@ public abstract class NavActor : Actor
             {
                 StartCoroutine("DelayedCollision", other);
             }
-        }
-        else
-        {
-            Debug.Log("Colliding with non ground");
         }
 
     }

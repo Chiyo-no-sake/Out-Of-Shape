@@ -8,10 +8,14 @@ public class SphericalNavMesh : MonoBehaviour
     // Start is called before the first frame update
     public float enemySize_TODO;
     public Mesh SphericalMesh;
+    [SerializeField] private float enemyRadius = 1;
+    [SerializeField] private float enemyHeight = 1;
 
     private Vector3[] vertices;
     private Dictionary<Vector3, List<Triangle>> nearbyTMap;
-
+    private Dictionary<Vector3, bool> traversableMap = new Dictionary<Vector3, bool>();
+    private float updateTimer = 0;
+    private bool updatedCorrectly = false;
 
     void Start()
     {
@@ -20,6 +24,14 @@ public class SphericalNavMesh : MonoBehaviour
 
     void Update()
     {
+        if (updateTimer == 0) updateTraversability();
+        if (updateTimer > 5 && !updatedCorrectly)
+        {
+            updatedCorrectly = true;
+            updateTraversability();
+        }
+
+        updateTimer += Time.deltaTime;
     }
 
     public Vector3 GetNearestVertex(GameObject other)
@@ -43,6 +55,21 @@ public class SphericalNavMesh : MonoBehaviour
     public Vector3 GetVertex(int index)
     {
         return vertices[index];
+    }
+
+    private void updateTraversability()
+    {
+        foreach(var v in vertices)
+        {
+            if (!traversableMap.ContainsKey(v))
+            {
+                traversableMap.Add(v, CalculateTraversability(v));
+            }
+            else 
+            {
+                traversableMap[v] = CalculateTraversability(v);
+            }
+        }
     }
 
     private void ComputeMeshData()
@@ -76,6 +103,30 @@ public class SphericalNavMesh : MonoBehaviour
             addToNearby(v3, faces[i]);
             
         }
+    }
+
+    public bool isTraversable(Vector3 vertex)
+    {
+        return traversableMap[vertex];
+    }
+
+
+    private bool CalculateTraversability(Vector3 vertex)
+    {
+        int layerMask = LayerMask.GetMask("Walls");
+        Vector3 normal = (vertex - transform.position).normalized;
+        Vector3 castStart = vertex - normal*2;
+        float castLen = enemyHeight + 2;
+
+        Ray ray = new Ray(castStart, normal);
+        return !Physics.SphereCast(ray, enemyRadius, castLen, layerMask);
+        
+    }
+
+    private void drawTraversabilityGizmos(Vector3 vertex)
+    {
+        Gizmos.color = new Color(1,0.3f,0.3f,0.6f);
+        Gizmos.DrawSphere(vertex, enemyRadius);
     }
 
     private void addToNearby(Vector3 vector, Triangle t)
@@ -133,6 +184,16 @@ public class SphericalNavMesh : MonoBehaviour
         Debug.DrawLine(t.GetVertex(1), t.GetVertex(2), c, duration);
         Debug.DrawLine(t.GetVertex(2), t.GetVertex(0), c, duration);
         Debug.DrawRay(t.GetCenter(), Vector3.Cross(t.GetVertex(0) - t.GetVertex(1), t.GetVertex(0) - t.GetVertex(2)), c, duration);
+    }
+
+    private void OnDrawGizmos()
+    {
+        if(vertices != null)
+        for (int i = 0; i < vertices.Length - 1; i++)
+        {
+            if(!isTraversable(vertices[i]))
+            drawTraversabilityGizmos(vertices[i]);
+        }
     }
 
 }

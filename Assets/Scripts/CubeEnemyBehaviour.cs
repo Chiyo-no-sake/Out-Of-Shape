@@ -18,8 +18,6 @@ public class CubeEnemyBehaviour : NavActor
 
     // Start is called before the first frame update
 
-
-
     protected void doStep(Vector3 targetPoint, Vector3 gravityVector)
     {
         Vector3 fwd = (targetPoint - transform.position).normalized;
