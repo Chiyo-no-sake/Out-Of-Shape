@@ -6,12 +6,15 @@ using UnityEngine;
 public class CubeEnemyBehaviour : NavActor
 {
     [SerializeField] private ParticleSystem collisionParticles;
+    [SerializeField] private ParticleSystem deathParticles;
     [SerializeField] private float acceleration = 1;
     [SerializeField] private float maxSpeed = 1;
     private Rigidbody _rigidbody;
     private ParticleSystem _particles;
+
     void Start()
     {
+        health = 5;
         _rigidbody = GetComponent<Rigidbody>();
         _particles = Instantiate(collisionParticles);
     }
@@ -36,7 +39,7 @@ public class CubeEnemyBehaviour : NavActor
 
     new protected void OnCollisionEnter(Collision collision)
     {
-        
+
         base.OnCollisionEnter(collision);
 
         Vector3 contact = collision.contacts[0].point;
@@ -79,4 +82,17 @@ public class CubeEnemyBehaviour : NavActor
     {
         return;
     }
+
+    public override void DestroySelf(){
+
+        Destroy(_particles);
+
+        ParticleSystem deathParticles = Instantiate(this.deathParticles);
+        deathParticles.transform.LookAt(transform.position);
+        deathParticles.transform.position = transform.position;
+        Destroy(deathParticles, 1);
+        Destroy(transform.root.gameObject);
+
+    }
+
 }
