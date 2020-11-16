@@ -31,17 +31,17 @@ public abstract class AIEnemy : Enemy
     
     public new void Update()
     {
+        if (path == null) return;
         if(!alreadySimplified)
             path = GetSimplyfiedPath(path);
         base.Update();
-        List<Vector3> vertices = new List<Vector3>();
-        //only for debug
-        if (path != null)
-                path.ForEach(n =>
-                {
-                    vertices.Add(n.vertex);
-                });
 
+        //only for debug
+        List<Vector3> vertices = new List<Vector3>();
+        path.ForEach(n =>
+        {
+            vertices.Add(n.vertex);
+        });
         SphericalNavMesh.DebugPath(vertices.ToArray(), Color.cyan);
 
     }

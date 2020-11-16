@@ -15,7 +15,7 @@ public class PlayerController : WorldEntity
 {
     // ############## Serial #######################
     // Movement and phisics
-    [SerializeField] private float acceleration = 2;
+    [SerializeField] private float speed = 1;
     [SerializeField] private float maxSpeed = 10;
     [SerializeField] private GameObject playerMesh;
     
@@ -67,12 +67,12 @@ public class PlayerController : WorldEntity
     }
 
     // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
         timer += Time.deltaTime;
         _position = transform.localPosition;
         handleInput();
-        preventExceedMaxSpeed();
+        //preventExceedMaxSpeed();
         computeAim();
         computeWeaponState();
     }
@@ -171,24 +171,24 @@ public class PlayerController : WorldEntity
     }
 
     private void handleInput(){
-        Vector3 accelVec = new Vector3();
-        if(Input.GetKey(KeyCode.W)){
-            accelVec.z += acceleration;
+        Vector3 forceDirection = new Vector3();
+
+        if (Input.GetKey(KeyCode.W)){
+            forceDirection += new Vector3(0, 0, 1);
         }
-        if(Input.GetKey(KeyCode.S)){
-            accelVec.z -= acceleration;
+        if (Input.GetKey(KeyCode.S)){
+            forceDirection += new Vector3(0, 0, -1);
         }
-        if(Input.GetKey(KeyCode.A)){
-            accelVec.x -= acceleration;
+        if (Input.GetKey(KeyCode.D)){
+            forceDirection += new Vector3(1, 0, 0);
         }
-        if(Input.GetKey(KeyCode.D)){
-            accelVec.x += acceleration;
+        if (Input.GetKey(KeyCode.A)){
+            forceDirection += new Vector3(-1, 0, 0);
         }
 
-        _rigidbody.AddRelativeForce(accelVec * Time.deltaTime*10000, ForceMode.Force);
-    }
+        forceDirection = forceDirection.normalized;
+        float force = _rigidbody.mass * (speed / Time.fixedDeltaTime);
 
-    private void preventExceedMaxSpeed(){
-        _rigidbody.velocity = Vector3.ClampMagnitude(_rigidbody.velocity, maxSpeed);
+        _rigidbody.AddRelativeForce(force * forceDirection, ForceMode.Force);
     }
 }

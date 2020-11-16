@@ -7,8 +7,7 @@ public class CubeEnemy : AIEnemy
 {
     [SerializeField] private ParticleSystem collisionParticles;
     [SerializeField] private ParticleSystem deathParticles;
-    [SerializeField] private float acceleration = 1;
-    [SerializeField] private float maxSpeed = 1;
+    [SerializeField] private float speed = 1;
     private Rigidbody _rigidbody;
     private ParticleSystem _particles;
 
@@ -27,14 +26,11 @@ public class CubeEnemy : AIEnemy
         Vector3 up = -gravityVector.normalized;
 
         Vector3 applyPoint = transform.position - fwd * transform.localScale.z + up * transform.localScale.y;
-        if (acceleration > maxSpeed) acceleration = maxSpeed;
-        _rigidbody.AddForceAtPosition(fwd * acceleration * Time.deltaTime * 1000, applyPoint, ForceMode.Impulse);
-        preventExceedMaxSpeed();
-    }
 
-    protected void preventExceedMaxSpeed()
-    {
-        _rigidbody.velocity = Vector3.ClampMagnitude(_rigidbody.velocity, maxSpeed);
+        float force = _rigidbody.mass * (speed / Time.fixedDeltaTime);
+        Vector3 forceDirection = fwd;
+
+        _rigidbody.AddForceAtPosition(force*forceDirection, applyPoint, ForceMode.Force);
     }
 
     protected override void StepTowardsTarget()
