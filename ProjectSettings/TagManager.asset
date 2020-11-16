@@ -9,6 +9,7 @@ TagManager:
   - PlayerMesh
   - PlayerRotationCenter
   - Enemy
+  - CameraController
   layers:
   - Default
   - TransparentFX
@@ -24,8 +25,8 @@ TagManager:
   - Walls
   - Projectiles
   - Players
-  - 
-  - 
+  - Ground
+  - Obstacles
   - 
   - 
   - 

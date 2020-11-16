@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WorldGravity : MonoBehaviour
+public class WorldController : MonoBehaviour
 {
 
     private Rigidbody _rigidbody;
@@ -46,7 +46,7 @@ public class WorldGravity : MonoBehaviour
             Vector3 targetPos = target.transform.localPosition;
 
             gravityVector *= gravity;
-            targetRb.AddForce(gravityVector, ForceMode.Acceleration);
+            targetRb.AddForce(gravityVector * targetRb.mass, ForceMode.Acceleration);
 
         } catch(MissingComponentException)
         {

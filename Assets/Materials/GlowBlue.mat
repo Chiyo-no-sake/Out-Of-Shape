@@ -90,9 +90,9 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - Color_3E6D8F9D: {r: 0.4575472, g: 0.49158344, b: 1, a: 0}
-    - Color_548374DF: {r: 1, g: 1, b: 1, a: 0}
-    - Color_ADFA812F: {r: 0, g: 0.028357267, b: 1, a: 0}
+    - Color_3E6D8F9D: {r: 0, g: 0.010046005, b: 1, a: 0}
+    - Color_548374DF: {r: 0, g: 0.03921604, b: 1, a: 0}
+    - Color_ADFA812F: {r: 0.36820188, g: 0.36320752, b: 1, a: 0}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 0, g: 0.21038413, b: 1, a: 1}
     - _EmissionColor: {r: 0.19339621, g: 0.43379557, b: 1, a: 1}

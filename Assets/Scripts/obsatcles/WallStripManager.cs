@@ -20,7 +20,7 @@ public class WallStripManager : MonoBehaviour
 
         for(int i=0; i<children.Length -1; i++)
         {
-            BuildStrip(children[i].gameObject.transform.localPosition, children[i + 1].gameObject.transform.localPosition);
+            BuildStrip(children[i].gameObject.transform.position, children[i + 1].gameObject.transform.position);
         }
     }
 
@@ -54,7 +54,7 @@ public class WallStripManager : MonoBehaviour
         float length = Vector3.Distance(start, end) / 2.0f;
 
         Gizmos.DrawLine(start, end);
-        Gizmos.DrawLine(start + start.normalized*wallHeight/2, end + end.normalized* wallHeight / 2);
+        Gizmos.DrawLine(start + start.normalized * wallHeight/2, end + end.normalized* wallHeight / 2);
         Gizmos.DrawLine(start + start.normalized * wallHeight, end + end.normalized * wallHeight);
     }
 
@@ -74,7 +74,7 @@ public class WallStripManager : MonoBehaviour
 
         for (int i = 0; i < children.Length - 1; i++)
         {
-            BuildGizmoStrip(children[i].gameObject.transform.localPosition, children[i + 1].gameObject.transform.localPosition);
+            BuildGizmoStrip(children[i].gameObject.transform.position, children[i + 1].gameObject.transform.position);
         }
     }
 }

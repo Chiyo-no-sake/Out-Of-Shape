@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 
-public abstract class Actor: LivingEntity
+public abstract class Enemy: LivingEntity
 {
     protected abstract void StepTowardsTarget();
     protected abstract bool IsTargetReached();

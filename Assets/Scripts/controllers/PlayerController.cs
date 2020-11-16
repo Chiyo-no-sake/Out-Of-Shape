@@ -11,7 +11,7 @@ enum WeaponState
 
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerBehaviour : WorldEntity
+public class PlayerController : WorldEntity
 {
     // ############## Serial #######################
     // Movement and phisics
@@ -144,8 +144,7 @@ public class PlayerBehaviour : WorldEntity
         Vector3 toLookPoint = cam.ScreenToWorldPoint(mousePos);
 
         Vector3 toLookVector = Vector3.ProjectOnPlane(toLookPoint, transform.up);
-        //Debug.DrawRay(_position, toLookVector);
-        playerMesh.transform.rotation = Quaternion.LookRotation(Vector3.Lerp(playerMesh.transform.forward, toLookVector, 2 * Time.deltaTime), transform.up);
+        playerMesh.transform.rotation = Quaternion.LookRotation(Vector3.LerpUnclamped(playerMesh.transform.forward, toLookVector, 2 * Time.deltaTime), transform.up);
 
     }
 
@@ -153,11 +152,11 @@ public class PlayerBehaviour : WorldEntity
     {
 
         GameObject p = Instantiate(projectileType);
-        ProjectileBehaviour pb = p.GetComponent<ProjectileBehaviour>();
+        ProjectileController pb = p.GetComponent<ProjectileController>();
 
         p.transform.position = playerMesh.transform.position;
         p.transform.rotation = Quaternion.LookRotation(playerMesh.transform.up, playerMesh.transform.forward);
-        pb.setCenter(currentPlanet.transform.localPosition);
+        pb.setCenter(currentPlanet.transform.position);
         pb.setRotAxis(playerMesh.transform.right);
         pb.setSpeed(projectileSpeed);
 

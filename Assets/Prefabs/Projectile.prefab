@@ -26,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1215292800}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.08}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 496037765184338097}
@@ -115,7 +115,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.35
+      scalar: 0.2
       minScalar: 0.1
       maxCurve:
         serializedVersion: 2
@@ -221,19 +221,19 @@ ParticleSystem:
     startColor:
       serializedVersion: 2
       minMaxState: 2
-      minColor: {r: 1, g: 0.25943398, b: 0.25943398, a: 1}
-      maxColor: {r: 0.2971698, g: 0.56618714, b: 1, a: 1}
+      minColor: {r: 0.5424528, g: 0.667959, b: 1, a: 1}
+      maxColor: {r: 0.09189948, g: 0.08962262, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 1, g: 0, b: 0.24550915, a: 1}
-        key1: {r: 0, g: 0.3602152, b: 1, a: 1}
+        key0: {r: 0, g: 0.14202714, b: 1, a: 1}
+        key1: {r: 1, g: 1, b: 1, a: 1}
         key2: {r: 0, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
         key4: {r: 0, g: 0, b: 0, a: 0}
         key5: {r: 0, g: 0, b: 0, a: 0}
         key6: {r: 0, g: 0, b: 0, a: 0}
         key7: {r: 0, g: 0, b: 0, a: 0}
-        ctime0: 0
+        ctime0: 44333
         ctime1: 65535
         ctime2: 0
         ctime3: 0
@@ -254,8 +254,8 @@ ParticleSystem:
         m_NumAlphaKeys: 2
       minGradient:
         serializedVersion: 2
-        key0: {r: 1, g: 0.7799357, b: 0, a: 1}
-        key1: {r: 0.13039613, g: 1, b: 0, a: 1}
+        key0: {r: 1, g: 0, b: 0.037613392, a: 1}
+        key1: {r: 1, g: 1, b: 1, a: 1}
         key2: {r: 0, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
         key4: {r: 0, g: 0, b: 0, a: 0}
@@ -918,7 +918,7 @@ ParticleSystem:
     rateOverDistance:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 5
+      scalar: 3
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -3619,13 +3619,13 @@ ParticleSystem:
         m_NumAlphaKeys: 2
     range: {x: 0, y: 1}
   CollisionModule:
-    enabled: 0
+    enabled: 1
     serializedVersion: 3
-    type: 0
+    type: 1
     collisionMode: 0
     colliderForce: 0
-    multiplyColliderForceByParticleSize: 0
-    multiplyColliderForceByParticleSpeed: 0
+    multiplyColliderForceByParticleSize: 1
+    multiplyColliderForceByParticleSpeed: 1
     multiplyColliderForceByCollisionAngle: 1
     plane0: {fileID: 0}
     plane1: {fileID: 0}
@@ -3794,7 +3794,7 @@ ParticleSystem:
         m_RotationOrder: 4
     minKillSpeed: 0
     maxKillSpeed: 10000
-    radiusScale: 1
+    radiusScale: 2
     collidesWith:
       serializedVersion: 2
       m_Bits: 4294967295
@@ -4864,13 +4864,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 496037765184338099}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25d028120e19871458b3a95b601c9585, type: 3}
+  m_Script: {fileID: 11500000, guid: ef62ce9d74c57db4db9423a38e71eb0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   collisionParticles: {fileID: 539424596284106952, guid: 7d454936d60c0f14ca1efbe135a6f8c2, type: 3}
-  _center: {x: 0, y: 0, z: 0}
-  _speed: 70
-  _rotAxis: {x: 0, y: 0, z: 0}
+  _speed: 1
   damage: 1
 --- !u!65 &8277401287989226936
 BoxCollider:
@@ -4880,7 +4878,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 496037765184338099}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 0.3, y: 1.3, z: 0.3}

@@ -5,52 +5,14 @@ using UnityEngine;
 using System.Linq;
 using System.Threading.Tasks;
 
-public class Node : IComparable<Node>
-{
-
-    public Node parent;
-    public Vector3 vertex;
-    public float g; // Distance from start to this
-    public float h; // Distance from this to end (circa)
-
-    public Node(Node parent, Vector3 thisVertex, float h)
-    {
-        this.parent = parent;
-        this.vertex = thisVertex;
-        this.h = h;
-        if (parent == null)
-            this.g = 0;
-        else
-            this.g = parent.g + 1;
-    }
-
-    public float f()
-    {
-        return g + h;
-    }
-
-    public int CompareTo(Node next)
-    {
-        return (int)(this.f() - next.f());
-    }
-
-    public override bool Equals(object obj)
-    {
-
-        if (obj != null && obj is Node node)
-        {
-            return node.vertex.Equals(this.vertex);
-        }
-
-        return false;
-    }
-}
 
 [RequireComponent(typeof(Collider))]
-public abstract class NavActor : Actor
+public abstract class AIEnemy : Enemy
 {
-
+    [SerializeField] private float enemyHeight = 2;
+    [SerializeField] private float enemyRadius = 1;
     [SerializeField] private float refreshDelay = 0.5f;
+    [SerializeField] private int maxNodesSimplified = 5;
     [SerializeField] private GameObject target;
 
     private bool updateNavigationPath = true;
@@ -58,15 +20,19 @@ public abstract class NavActor : Actor
     private List<Node> path;
     private int pathStepIndex;
 
+    private volatile bool alreadySimplified = false;
+
     // to implement in child class
 
-    public NavActor()
+    public AIEnemy()
     {
         this.path = null;
     }
     
     public new void Update()
     {
+        if(!alreadySimplified)
+            path = GetSimplyfiedPath(path);
         base.Update();
         List<Vector3> vertices = new List<Vector3>();
         //only for debug
@@ -76,11 +42,11 @@ public abstract class NavActor : Actor
                     vertices.Add(n.vertex);
                 });
 
-        SphericalNavMesh.DebugPath(vertices.ToArray(), Color.cyan, this.refreshDelay);
+        SphericalNavMesh.DebugPath(vertices.ToArray(), Color.cyan);
 
     }
 
-    public List<Node> getPath()
+    public List<Node> GetPath()
     {
         return this.path;
     }
@@ -100,7 +66,7 @@ public abstract class NavActor : Actor
 
 
     //delay between fresh starts of the path-seeking algorithm
-    IEnumerator DelayedCollision(Collision other)
+    private IEnumerator DelayedCollision(Collision other)
     {
         updateNavigationPath = false;
         currentPlanet = other.gameObject;
@@ -120,6 +86,7 @@ public abstract class NavActor : Actor
 
             Task.Factory.StartNew(() => {
                 path = CreatePath(start, end);
+                alreadySimplified = false;
                 pathStepIndex = 0;
             });
         }
@@ -237,6 +204,62 @@ public abstract class NavActor : Actor
         return cheapest;
     }
 
+    private List<Node> GetSimplyfiedPath(List<Node> path)
+    {
+        // assign a first node s, and another node n
+        // put s into the new path
+        // try to go from s -> n without collisions,
+        // if there is no collision, retry with n = n.next
+        // if there is a collision, put the last valid n into the list
+        // the put s = lastValid_n and n = s.next
+
+        if (path == null) return null;
+
+        List<Node> simplified = new List<Node>();
+        int sIndex = 0, nIndex = 1, lastOkIndex = 0;
+
+        int mask = LayerMask.GetMask("Walls");
+        int collapsed = 0;
+        float capsuleBodyHeight = enemyHeight - enemyRadius * 2;
+        float capsuleStartOffset = enemyRadius;
+        float capsuleEndOffset = capsuleStartOffset + capsuleBodyHeight;
+
+        simplified.Add(path[0]);
+        
+        while (!simplified.Contains(path.Last()))
+        {
+            if (nIndex >= path.Count())
+            {
+                simplified.Add(path[lastOkIndex]);
+                continue;
+            }
+            Vector3 vertexNormal = (path.ElementAt(sIndex).vertex - navSurface.transform.position).normalized;
+            Vector3 capsuleP1 = path.ElementAt(sIndex).vertex + vertexNormal * capsuleStartOffset;
+            Vector3 capsuleP2 = path.ElementAt(sIndex).vertex + vertexNormal * capsuleEndOffset;
+            Vector3 dir = path.ElementAt(nIndex).vertex - path.ElementAt(sIndex).vertex;
+            float dist = Vector3.Distance(path.ElementAt(sIndex).vertex, path.ElementAt(nIndex).vertex);
+
+            if (collapsed >= maxNodesSimplified || Physics.CapsuleCast(capsuleP1, capsuleP2, enemyRadius, dir, dist, mask))
+            {
+                // cannot simplify
+                simplified.Add(path.ElementAt(lastOkIndex));
+                sIndex = lastOkIndex;
+                Debug.Log("collapsed: " + collapsed + ", resetting.");
+                collapsed = 0;
+            }
+            else
+            {
+                // simplify
+                lastOkIndex = nIndex;
+                nIndex++;
+                collapsed++;
+            }
+        }
+
+        alreadySimplified = true;
+        return simplified;
+    }
+
     protected void OnCollisionStay(Collision other)
     { 
         if (other.gameObject.CompareTag("Ground"))
@@ -259,4 +282,45 @@ public abstract class NavActor : Actor
         
     }
 
+}
+
+public class Node : IComparable<Node>
+{
+
+    public Node parent;
+    public Vector3 vertex;
+    public float g; // Distance from start to this
+    public float h; // Distance from this to end (circa)
+
+    public Node(Node parent, Vector3 thisVertex, float h)
+    {
+        this.parent = parent;
+        this.vertex = thisVertex;
+        this.h = h;
+        if (parent == null)
+            this.g = 0;
+        else
+            this.g = parent.g + 1;
+    }
+
+    public float f()
+    {
+        return g + h;
+    }
+
+    public int CompareTo(Node next)
+    {
+        return (int)(this.f() - next.f());
+    }
+
+    public override bool Equals(object obj)
+    {
+
+        if (obj != null && obj is Node node)
+        {
+            return node.vertex.Equals(this.vertex);
+        }
+
+        return false;
+    }
 }

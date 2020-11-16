@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-public class CubeEnemyBehaviour : NavActor
+public class CubeEnemy : AIEnemy
 {
     [SerializeField] private ParticleSystem collisionParticles;
     [SerializeField] private ParticleSystem deathParticles;
@@ -37,35 +37,9 @@ public class CubeEnemyBehaviour : NavActor
         _rigidbody.velocity = Vector3.ClampMagnitude(_rigidbody.velocity, maxSpeed);
     }
 
-    new protected void OnCollisionEnter(Collision collision)
-    {
-
-        base.OnCollisionEnter(collision);
-
-        Vector3 contact = collision.contacts[0].point;
-        _particles.transform.LookAt(transform.position);
-        _particles.transform.position = contact;
-        _particles.Play();
-    }
-
-    new protected void OnCollisionStay(Collision collision)
-    {
-        base.OnCollisionStay(collision);
-
-        Vector3 contact = collision.contacts[0].point;
-        _particles.transform.LookAt(transform.position);
-        _particles.transform.position = contact;
-    }
-
-    new protected void OnCollisionExit(Collision collision)
-    {
-        base.OnCollisionExit(collision);
-        _particles.Stop();
-    }
-
     protected override void StepTowardsTarget()
     {
-        if(getPath() == null) return;
+        if(GetPath() == null) return;
         Node target = GetNextPathPoint();
         Vector3 gravityDir = (currentPlanet.transform.position - transform.position).normalized;
         doStep(target.vertex, gravityDir);
@@ -74,7 +48,7 @@ public class CubeEnemyBehaviour : NavActor
 
     protected override bool IsTargetReached()
     {
-        if (getPath() == null) return false;
+        if (GetPath() == null) return false;
         return false;
     }
 
@@ -90,7 +64,10 @@ public class CubeEnemyBehaviour : NavActor
         ParticleSystem deathParticles = Instantiate(this.deathParticles);
         deathParticles.transform.LookAt(transform.position);
         deathParticles.transform.position = transform.position;
-        Destroy(deathParticles, 1);
+
+        GameObject.Find("CameraController").GetComponent<CameraController>().ShakeCamera();
+
+        Destroy(deathParticles, 3);
         Destroy(transform.root.gameObject);
 
     }

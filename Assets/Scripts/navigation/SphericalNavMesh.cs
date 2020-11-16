@@ -170,7 +170,7 @@ public class SphericalNavMesh : MonoBehaviour
         return false;
     }
 
-    public static void DebugPath(Vector3[] vertices, Color c, float duration)
+    public static void DebugPath(Vector3[] vertices, Color c, float duration = 0)
     {
         for(int i=0; i<vertices.Length -1; i++)
         {
