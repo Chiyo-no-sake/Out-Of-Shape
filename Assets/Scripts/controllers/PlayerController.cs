@@ -187,12 +187,13 @@ public class PlayerController : LivingEntity, IAttacker
 
     private void handleInput(){
         Vector3 forceDirection;
+        CameraController cc = GameObject.Find("CameraController").GetComponent<CameraController>();
 
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
 
-        forceDirection = Vector3.ClampMagnitude(new Vector3(h, 0, v), 1);
+        forceDirection = Vector3.ClampMagnitude(h * cc.GetRightDirection() + v * cc.GetForwardDirection(), 1);
 
-        _rigidbody.AddRelativeForce(speed * forceDirection / Time.fixedDeltaTime, ForceMode.Force);
+        _rigidbody.AddForce(speed * forceDirection / Time.fixedDeltaTime, ForceMode.Force);
     }
 }

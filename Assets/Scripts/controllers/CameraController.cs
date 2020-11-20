@@ -5,18 +5,23 @@ using MilkShake;
 
 public class CameraController : MonoBehaviour
 {
-    [SerializeField] private GameObject boundGameObject = null;
+    [SerializeField] private GameObject boundGameObjectTP = null;
+    [SerializeField] private GameObject boundGameObjectFP = null;
     [SerializeField] private ShakePreset enemyDeathShakePreset = null;
     [SerializeField] private Vector3 thirdPersonOffset = new Vector3(0, 0, 0);
     [SerializeField] private Vector3 firstPersonOffset = new Vector3(0, 0, 0);
     [SerializeField] private float cameraDrag = 1;
+    [SerializeField] private float cameraSensibility = 3;
 
     private Vector3 velocity = Vector3.zero;
+    private float xRotation = 0;
+    private float yRotation = 0;
 
     private GameObject mainCamera;
-
     private GameObject fpCamera;
     private GameObject tpCamera;
+
+
 
     // Start is called before the first frame update
     void Start()
@@ -28,7 +33,7 @@ public class CameraController : MonoBehaviour
     void Update()
     {
         UpdateMainCamera();
-        UpdateCamerasPosition();
+        UpdateCamerasTransform();
     }
 
     private void UpdateMainCamera()
@@ -39,9 +44,9 @@ public class CameraController : MonoBehaviour
 
             mainCamera.SetActive(false);
             mainCamera = (mainCamera == tpCamera) ? fpCamera : tpCamera;
-            mainCamera.SetActive(true);
-
         }
+
+        mainCamera.SetActive(true);
 
     }
     public void ShakeCamera()
@@ -50,14 +55,14 @@ public class CameraController : MonoBehaviour
         cameraShaker.Shake(enemyDeathShakePreset);
     }
 
-    public void UpdateCamerasPosition()
+    public void UpdateCamerasTransform()
     {
         //first person
 
-        Transform fpCameraContainer = fpCamera.transform;
+        Transform fpCameraContainer = fpCamera.transform;   
 
-        fpCameraContainer.position = boundGameObject.transform.position;
-        fpCameraContainer.rotation = boundGameObject.transform.rotation;
+        fpCameraContainer.position = boundGameObjectFP.transform.position;
+        fpCameraContainer.rotation = boundGameObjectFP.transform.rotation;
 
 
         //third person
@@ -65,15 +70,13 @@ public class CameraController : MonoBehaviour
 
         tpCameraContainer.position = Vector3.SmoothDamp(
             tpCameraContainer.position, 
-            boundGameObject.transform.TransformPoint(thirdPersonOffset), 
+            boundGameObjectTP.transform.TransformPoint(thirdPersonOffset), 
             ref velocity, 
             cameraDrag);
-
-        Debug.DrawLine(new Vector3(0, 0, 0), boundGameObject.transform.TransformPoint(thirdPersonOffset));
        
         tpCameraContainer.rotation = Quaternion.LookRotation(
-                Vector3.LerpUnclamped(tpCameraContainer.forward, -boundGameObject.transform.up, 0.25f),
-                boundGameObject.transform.forward);
+                Vector3.LerpUnclamped(tpCameraContainer.forward, -boundGameObjectTP.transform.up, 0.25f),
+                boundGameObjectTP.transform.forward);
     }
 
     private void LookForCameras()
@@ -81,7 +84,8 @@ public class CameraController : MonoBehaviour
 
         fpCamera = transform.Find("CameraContainer_FP").gameObject;
         tpCamera = transform.Find("CameraContainer_TP").gameObject;
-
+        fpCamera.SetActive(false);
+        tpCamera.SetActive(false);
     }
 
     public Camera GetMainCamera()
@@ -91,7 +95,7 @@ public class CameraController : MonoBehaviour
 
     public void RotateTowardsMouse(GameObject go)
     {
-        if (boundGameObject.GetComponent<PlayerController>().GetCurrentPlanet() == null)
+        if (boundGameObjectTP.GetComponent<PlayerController>().GetCurrentPlanet() == null)
             return;
 
 
@@ -99,24 +103,52 @@ public class CameraController : MonoBehaviour
         {
 
             Vector3 mousePos = Input.mousePosition;
-            mousePos.z = Vector3.Distance(boundGameObject.GetComponent<PlayerController>().GetCurrentPlanet().transform.position, boundGameObject.transform.position);
+            mousePos.z = Vector3.Distance(boundGameObjectTP.GetComponent<PlayerController>().GetCurrentPlanet().transform.position, boundGameObjectTP.transform.position);
             
             Vector3 toLookPoint = GetMainCamera().ScreenToWorldPoint(mousePos);
-            Vector3 toLookVector = Vector3.ProjectOnPlane(toLookPoint, boundGameObject.transform.up);
+            Vector3 toLookVector = Vector3.ProjectOnPlane(toLookPoint, boundGameObjectTP.transform.up);
 
-            go.transform.rotation = Quaternion.LookRotation(Vector3.LerpUnclamped(go.transform.forward, toLookVector, 2 * Time.deltaTime), boundGameObject.transform.up);
+            go.transform.rotation = Quaternion.LookRotation(Vector3.LerpUnclamped(go.transform.forward, toLookVector, 2 * Time.deltaTime), boundGameObjectTP.transform.up);
         }
 
         if (mainCamera == fpCamera)
         {
+            float mouseX = Input.GetAxis("Mouse X");
+            float mouseY = Input.GetAxis("Mouse Y");
 
-            Quaternion playerTransform = boundGameObject.transform.rotation;
+            xRotation -= mouseY * cameraSensibility;
+            xRotation = Mathf.Clamp(xRotation, -90.0f, 90.0f);
 
-            float rotateX = Input.GetAxis("Mouse X") *  Time.deltaTime;
-            float rotateY = Input.GetAxis("Mouse Y") * Time.deltaTime;
+            yRotation += mouseX * cameraSensibility;
 
-            go.transform.Rotate(new Vector3(rotateX, rotateY, 0), Space.Self);
-            
+            go.transform.localRotation = Quaternion.Euler(xRotation, yRotation, 0.0f);
+        }
+    }
+
+    public Vector3 GetForwardDirection()
+    {
+        if(mainCamera == tpCamera)
+        {
+            return boundGameObjectTP.transform.forward.normalized;
+        }
+      
+        else
+        {
+            return Vector3.ProjectOnPlane(boundGameObjectFP.transform.forward, boundGameObjectTP.transform.up).normalized;
+        }
+
+    }
+
+    public Vector3 GetRightDirection()
+    {
+        if (mainCamera == tpCamera)
+        {
+            return boundGameObjectTP.transform.right.normalized;
+        }
+
+        else
+        {
+            return Vector3.ProjectOnPlane(boundGameObjectFP.transform.right, boundGameObjectTP.transform.up).normalized;
         }
     }
 
