@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Explosion
   m_EditorClassIdentifier: 
   shakeType: 0
-  strength: 0.3
+  strength: 0.5
   roughness: 15
   fadeIn: 0.05
   fadeOut: 0.3
-  positionInfluence: {x: 1, y: 0, z: 1}
-  rotationInfluence: {x: 10, y: 10, z: 10}
+  positionInfluence: {x: 2, y: 0.5, z: 2}
+  rotationInfluence: {x: 15, y: 10, z: 15}
