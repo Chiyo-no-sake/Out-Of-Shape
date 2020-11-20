@@ -3,12 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Collider))]
 public class WorldController : MonoBehaviour
 {
-
-    private Rigidbody _rigidbody;
-    private Collider _atmosphere;
     private Vector3 _position;
+    private HashSet<GameObject> _bodies;
 
     public float terrainDensity = 5.5f;
     public float gravity = 9.81f;
@@ -16,9 +15,8 @@ public class WorldController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _rigidbody = GetComponentsInChildren<Rigidbody>()[0];
-        _atmosphere = GetComponent<Collider>();
         _position = transform.localPosition;
+        _bodies = new HashSet<GameObject>();
     }
 
     // Update is called once per frame
@@ -27,11 +25,18 @@ public class WorldController : MonoBehaviour
 
     }
 
+    private void FixedUpdate()
+    {
+        _bodies.RemoveWhere(body => body == null);
+        foreach(var body in _bodies) ApplyGravityTo(body);
+    }
+
     private void OnTriggerStay(Collider other)
     {
-        if (other.attachedRigidbody != null)
+
+        if (other.attachedRigidbody != null && !other.attachedRigidbody.isKinematic)
         {
-            ApplyGravityTo(other.gameObject);
+            _bodies.Add(other.gameObject);
         }
     }
 
@@ -46,7 +51,7 @@ public class WorldController : MonoBehaviour
             Vector3 targetPos = target.transform.localPosition;
 
             gravityVector *= gravity;
-            targetRb.AddForce(gravityVector * targetRb.mass, ForceMode.Acceleration);
+            targetRb.AddForce(gravityVector, ForceMode.Acceleration);
 
         } catch(MissingComponentException)
         {

@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class WallStripManager : MonoBehaviour
 {
-    [SerializeField] private GameObject ownerWorld;
-    [SerializeField] private GameObject stripPrefab;
+    [SerializeField] private GameObject ownerWorld = null;
+    [SerializeField] private GameObject stripPrefab = null;
     [SerializeField] private float wallHeight = 5;
 
     // Start is called before the first frame update

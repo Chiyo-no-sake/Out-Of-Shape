@@ -19,13 +19,18 @@ public abstract class LivingEntity : WorldEntity
 
     }
 
-    public void TakeHit(int damage){
+    // return true if enemy dies
+    public bool TakeHit(int damage){
 
       health -= damage;
 
-      if(health <= 0)
-        DestroySelf();
+        if (health <= 0)
+        {
+            DestroySelf();
+            return true;
+        }
 
+        return false;
     }
 
     public abstract void DestroySelf();

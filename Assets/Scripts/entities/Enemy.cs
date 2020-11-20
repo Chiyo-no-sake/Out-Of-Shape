@@ -9,7 +9,7 @@ public abstract class Enemy: LivingEntity
     protected abstract bool IsTargetReached();
     protected abstract void OnTargetReached();
 
-    public void Update()
+    protected virtual void FixedUpdate()
     {
         if (IsTargetReached())
         {

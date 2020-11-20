@@ -6,14 +6,13 @@ using UnityEngine;
 public class SphericalNavMesh : MonoBehaviour
 {
     // Start is called before the first frame update
-    public float enemySize_TODO;
     public Mesh SphericalMesh;
     [SerializeField] private float enemyRadius = 1;
     [SerializeField] private float enemyHeight = 1;
 
     private Vector3[] vertices;
     private Dictionary<Vector3, List<Triangle>> nearbyTMap;
-    private Dictionary<Vector3, bool> traversableMap = new Dictionary<Vector3, bool>();
+    private readonly Dictionary<Vector3, bool> traversableMap = new Dictionary<Vector3, bool>();
     private float updateTimer = 0;
     private bool updatedCorrectly = false;
 
@@ -24,11 +23,11 @@ public class SphericalNavMesh : MonoBehaviour
 
     void Update()
     {
-        if (updateTimer == 0) updateTraversability();
+        if (updateTimer == 0) UpdateTraversability();
         if (updateTimer > 5 && !updatedCorrectly)
         {
             updatedCorrectly = true;
-            updateTraversability();
+            UpdateTraversability();
         }
 
         updateTimer += Time.deltaTime;
@@ -57,7 +56,12 @@ public class SphericalNavMesh : MonoBehaviour
         return vertices[index];
     }
 
-    private void updateTraversability()
+    public bool IsUpdatedCorrectly()
+    {
+        return this.updatedCorrectly;
+    }
+
+    private void UpdateTraversability()
     {
         foreach(var v in vertices)
         {
@@ -98,14 +102,14 @@ public class SphericalNavMesh : MonoBehaviour
             faces[i] = new Triangle(triangles[currTriangleStart], triangles[currTriangleStart+1], triangles[currTriangleStart+2], this);
 
             // Add vertex and triangles to the map
-            addToNearby(v1, faces[i]);
-            addToNearby(v2, faces[i]);
-            addToNearby(v3, faces[i]);
+            AddToNearby(v1, faces[i]);
+            AddToNearby(v2, faces[i]);
+            AddToNearby(v3, faces[i]);
             
         }
     }
 
-    public bool isTraversable(Vector3 vertex)
+    public bool IsTraversable(Vector3 vertex)
     {
         return traversableMap[vertex];
     }
@@ -115,21 +119,21 @@ public class SphericalNavMesh : MonoBehaviour
     {
         int layerMask = LayerMask.GetMask("Walls");
         Vector3 normal = (vertex - transform.position).normalized;
-        Vector3 castStart = vertex - normal*2;
-        float castLen = enemyHeight + 2;
+        Vector3 castStart = vertex - normal*5;
+        float castLen = enemyHeight + 5;
 
         Ray ray = new Ray(castStart, normal);
         return !Physics.SphereCast(ray, enemyRadius, castLen, layerMask);
         
     }
 
-    private void drawTraversabilityGizmos(Vector3 vertex)
+    private void DrawTraversabilityGizmos(Vector3 vertex)
     {
         Gizmos.color = new Color(1,0.3f,0.3f,0.6f);
         Gizmos.DrawSphere(vertex, enemyRadius);
     }
 
-    private void addToNearby(Vector3 vector, Triangle t)
+    private void AddToNearby(Vector3 vector, Triangle t)
     {
         if (!nearbyTMap.ContainsKey(vector))
         {
@@ -145,7 +149,7 @@ public class SphericalNavMesh : MonoBehaviour
         foreach(var v in vertices){
             if(vertex != null)
             {
-                if (areNeighbors(vertex, v) && vertex != v && !neighbors.Contains(v))
+                if (AreNeighbors(vertex, v) && vertex != v && !neighbors.Contains(v))
                 {
                     neighbors.Add(v);
                 }
@@ -155,7 +159,7 @@ public class SphericalNavMesh : MonoBehaviour
         return neighbors;
     }
 
-    public bool areNeighbors(Vector3 v1, Vector3 v2)
+    public bool AreNeighbors(Vector3 v1, Vector3 v2)
     {
         // two vertex are neighbors if they have a triangle in common
         List<Triangle> nearby1 = nearbyTMap[v1];
@@ -191,8 +195,8 @@ public class SphericalNavMesh : MonoBehaviour
         if(vertices != null)
         for (int i = 0; i < vertices.Length - 1; i++)
         {
-            if(!isTraversable(vertices[i]))
-            drawTraversabilityGizmos(vertices[i]);
+            if(!IsTraversable(vertices[i]))
+            DrawTraversabilityGizmos(vertices[i]);
         }
     }
 

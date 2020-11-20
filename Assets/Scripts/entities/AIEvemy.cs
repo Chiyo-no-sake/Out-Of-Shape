@@ -13,14 +13,21 @@ public abstract class AIEnemy : Enemy
     [SerializeField] private float enemyRadius = 1;
     [SerializeField] private float refreshDelay = 0.5f;
     [SerializeField] private int maxNodesSimplified = 5;
-    [SerializeField] private GameObject target;
+    [SerializeField] private GameObject target = null;
 
     private bool updateNavigationPath = true;
     private SphericalNavMesh navSurface;
-    private List<Node> path;
     private int pathStepIndex;
 
+    // ------------ Shared between task and unity thread ------------------- //
+
+    private volatile List<Node> path;
+
+    // the task is write-only, main thread is read-only
+    private volatile bool computing = false;
     private volatile bool alreadySimplified = false;
+
+    // --------------------------------------------------------------------- //
 
     // to implement in child class
 
@@ -29,15 +36,14 @@ public abstract class AIEnemy : Enemy
         this.path = null;
     }
     
-    public new void Update()
+    protected void LateUpdate()
     {
         if (path == null) return;
         if(!alreadySimplified)
             path = GetSimplyfiedPath(path);
-        base.Update();
 
         //only for debug
-        List<Vector3> vertices = new List<Vector3>();
+        List < Vector3 > vertices = new List<Vector3>();
         path.ForEach(n =>
         {
             vertices.Add(n.vertex);
@@ -60,17 +66,22 @@ public abstract class AIEnemy : Enemy
     public void UpdateNextPathPoint()
     {
         Vector3 currVertex = navSurface.GetNearestVertex(this.gameObject);
+        if (path == null) return;
+        if (path.Count() >= pathStepIndex) return;
         if (path.ElementAt(pathStepIndex).vertex == currVertex)
             ++pathStepIndex;
     }
 
+    public bool isComputing()
+    {
+        return this.computing;
+    }
+
 
     //delay between fresh starts of the path-seeking algorithm
-    private IEnumerator DelayedCollision(Collision other)
+    private IEnumerator BebignAStar()
     {
         updateNavigationPath = false;
-        currentPlanet = other.gameObject;
-        navSurface = currentPlanet.GetComponent<SphericalNavMesh>();
 
         Vector3 first = navSurface.GetNearestVertex(this.gameObject);
         Vector3 last = navSurface.GetNearestVertex(target);
@@ -85,7 +96,9 @@ public abstract class AIEnemy : Enemy
             Node end = new Node(null, last, 0);
 
             Task.Factory.StartNew(() => {
+                computing = true;
                 path = CreatePath(start, end);
+                computing = false;
                 alreadySimplified = false;
                 pathStepIndex = 0;
             });
@@ -101,6 +114,9 @@ public abstract class AIEnemy : Enemy
     private List<Node> CreatePath(Node first, Node last)
     {
         Node arrive = GetLast(first, last);
+
+        if (arrive == null) return null;
+
         List<Node> path = new List<Node>();
         List<Node> finalPath = new List<Node>();
         Node curr = arrive;
@@ -133,7 +149,7 @@ public abstract class AIEnemy : Enemy
 
         openList.Add(first);
 
-        while (openList.Count > 0)
+        while (openList.Count > 0 && navSurface.IsTraversable(last.vertex))
         {
             // get the cheapest node in the OL and move it to the closedList
             Node current = GetCheapest(openList);
@@ -159,7 +175,7 @@ public abstract class AIEnemy : Enemy
                 float distanceToEnd = Vector3.Distance(currPos, endPos);
                 Node n = new Node(current, t, distanceToEnd);
 
-                if (closedList.Contains(n) || !navSurface.isTraversable(n.vertex))
+                if (closedList.Contains(n) || !navSurface.IsTraversable(n.vertex))
                     continue;
                 if ((!openList.Contains(n)))
                     openList.Add(n);
@@ -233,6 +249,7 @@ public abstract class AIEnemy : Enemy
                 simplified.Add(path[lastOkIndex]);
                 continue;
             }
+
             Vector3 vertexNormal = (path.ElementAt(sIndex).vertex - navSurface.transform.position).normalized;
             Vector3 capsuleP1 = path.ElementAt(sIndex).vertex + vertexNormal * capsuleStartOffset;
             Vector3 capsuleP2 = path.ElementAt(sIndex).vertex + vertexNormal * capsuleEndOffset;
@@ -244,7 +261,6 @@ public abstract class AIEnemy : Enemy
                 // cannot simplify
                 simplified.Add(path.ElementAt(lastOkIndex));
                 sIndex = lastOkIndex;
-                Debug.Log("collapsed: " + collapsed + ", resetting.");
                 collapsed = 0;
             }
             else
@@ -264,9 +280,12 @@ public abstract class AIEnemy : Enemy
     { 
         if (other.gameObject.CompareTag("Ground"))
         {
-            if (updateNavigationPath)
+            currentPlanet = other.gameObject;
+            navSurface = currentPlanet.GetComponent<SphericalNavMesh>();
+
+            if (updateNavigationPath && !isComputing() && navSurface.IsUpdatedCorrectly())
             {
-                StartCoroutine("DelayedCollision", other);
+                StartCoroutine(BebignAStar());
             }
         }
 

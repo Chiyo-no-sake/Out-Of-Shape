@@ -11,18 +11,17 @@ enum WeaponState
 
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerController : WorldEntity
+public class PlayerController : LivingEntity, IAttacker
 {
     // ############## Serial #######################
     // Movement and phisics
     [SerializeField] private float speed = 1;
-    [SerializeField] private float maxSpeed = 10;
     [SerializeField] private GameObject playerMesh;
     
     // Shooting and Animation
-    [SerializeField] private GameObject projectileType;
-    [SerializeField] private float projectileSpeed;
-    [SerializeField] private float projectileLife;
+    [SerializeField] private GameObject projectileType = null;
+    [SerializeField] private float projectileSpeed = 50.0f;
+    [SerializeField] private float projectileLife = 1.0f;
     [SerializeField] private float minShootingDelta = 0.2f;
     [SerializeField] private float maxShootingDelta = 1;
     [SerializeField] private float maxAnimationSpeed = 10;
@@ -71,10 +70,13 @@ public class PlayerController : WorldEntity
     {
         timer += Time.deltaTime;
         _position = transform.localPosition;
-        handleInput();
-        //preventExceedMaxSpeed();
         computeAim();
         computeWeaponState();
+    }
+
+    private void FixedUpdate()
+    {
+        handleInput();
     }
 
     private void computeWeaponState()
@@ -109,7 +111,7 @@ public class PlayerController : WorldEntity
     {
         if(timer >= shootingDelta)
         {
-            shoot();
+            Attack();
             timer = 0;
         }
     }
@@ -148,21 +150,41 @@ public class PlayerController : WorldEntity
 
     }
 
-    private void shoot()
+    public void Attack()
     {
+        GameObject projectile = Instantiate(projectileType);
+        ProjectileController pc = projectile.GetComponent<ProjectileController>();
 
-        GameObject p = Instantiate(projectileType);
-        ProjectileController pb = p.GetComponent<ProjectileController>();
+        projectile.transform.position = playerMesh.transform.position + playerMesh.transform.forward.normalized * 2;
+        projectile.transform.rotation = Quaternion.LookRotation(playerMesh.transform.up, playerMesh.transform.forward);
 
-        p.transform.position = playerMesh.transform.position;
-        p.transform.rotation = Quaternion.LookRotation(playerMesh.transform.up, playerMesh.transform.forward);
-        pb.setCenter(currentPlanet.transform.position);
-        pb.setRotAxis(playerMesh.transform.right);
-        pb.setSpeed(projectileSpeed);
+        pc.SetCaster(this);
+        pc.SetCenter(currentPlanet.transform.position);
+        pc.SetRotAxis(playerMesh.transform.right);
+        pc.SetSpeed(projectileSpeed);
 
-        Destroy(p, projectileLife);
+        Destroy(projectile, projectileLife);
     }
 
+    public void OnHit(LivingEntity other)
+    {
+
+    }
+
+    public override void DestroySelf()
+    {
+        Debug.Log("TODO: sei morto");
+    }
+
+    public void OnKill(LivingEntity other)
+    {
+        GameObject.Find("CameraController").GetComponent<CameraController>().ShakeCamera();
+    }
+
+    public bool IsHostileTo(WorldEntity other)
+    {
+        return other.GetTeamNumber() != GetTeamNumber();
+    }
 
     private void applyRotation()
     {
@@ -171,24 +193,13 @@ public class PlayerController : WorldEntity
     }
 
     private void handleInput(){
-        Vector3 forceDirection = new Vector3();
+        Vector3 forceDirection;
 
-        if (Input.GetKey(KeyCode.W)){
-            forceDirection += new Vector3(0, 0, 1);
-        }
-        if (Input.GetKey(KeyCode.S)){
-            forceDirection += new Vector3(0, 0, -1);
-        }
-        if (Input.GetKey(KeyCode.D)){
-            forceDirection += new Vector3(1, 0, 0);
-        }
-        if (Input.GetKey(KeyCode.A)){
-            forceDirection += new Vector3(-1, 0, 0);
-        }
+        float h = Input.GetAxis("Horizontal");
+        float v = Input.GetAxis("Vertical");
 
-        forceDirection = forceDirection.normalized;
-        float force = _rigidbody.mass * (speed / Time.fixedDeltaTime);
+        forceDirection = Vector3.ClampMagnitude(new Vector3(h, 0, v), 1);
 
-        _rigidbody.AddRelativeForce(force * forceDirection, ForceMode.Force);
+        _rigidbody.AddRelativeForce(speed * forceDirection / Time.fixedDeltaTime, ForceMode.Force);
     }
 }
