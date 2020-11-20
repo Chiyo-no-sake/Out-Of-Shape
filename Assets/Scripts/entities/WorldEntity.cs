@@ -10,5 +10,13 @@ public class WorldEntity : MonoBehaviour
     public int GetTeamNumber()
     {
         return teamNumber;
+    
     }
+
+    public GameObject GetCurrentPlanet()
+    {
+        return currentPlanet;
+    }
+
+
 }

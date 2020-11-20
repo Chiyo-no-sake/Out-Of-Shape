@@ -29,7 +29,7 @@ public class PlayerController : LivingEntity, IAttacker
 
     // ############### Private #####################
     //physics and movement
-    private Camera cam;
+    private CameraController cameraController;
     private Rigidbody _rigidbody;
     private Vector3 _position;
 
@@ -139,15 +139,8 @@ public class PlayerController : LivingEntity, IAttacker
 
     private void computeAim()
     {
-        cam = Camera.main;
-        Vector3 mousePos = Input.mousePosition;
-        mousePos.z = Vector3.Distance(currentPlanet.transform.position, transform.position);
-
-        Vector3 toLookPoint = cam.ScreenToWorldPoint(mousePos);
-
-        Vector3 toLookVector = Vector3.ProjectOnPlane(toLookPoint, transform.up);
-        playerMesh.transform.rotation = Quaternion.LookRotation(Vector3.LerpUnclamped(playerMesh.transform.forward, toLookVector, 2 * Time.deltaTime), transform.up);
-
+        cameraController = GameObject.Find("CameraController").GetComponent<CameraController>();
+        cameraController.RotateTowardsMouse(playerMesh);
     }
 
     public void Attack()

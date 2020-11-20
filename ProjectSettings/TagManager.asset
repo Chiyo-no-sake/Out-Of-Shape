@@ -10,6 +10,8 @@ TagManager:
   - PlayerRotationCenter
   - Enemy
   - CameraController
+  - FPCamera
+  - TPCamera
   layers:
   - Default
   - TransparentFX
