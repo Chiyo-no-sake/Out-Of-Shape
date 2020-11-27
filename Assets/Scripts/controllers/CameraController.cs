@@ -8,6 +8,7 @@ public class CameraController : MonoBehaviour
     [SerializeField] private GameObject boundGameObjectTP = null;
     [SerializeField] private GameObject boundGameObjectFP = null;
     [SerializeField] private ShakePreset enemyDeathShakePreset = null;
+    [SerializeField] private ShakePreset playerHitShakePreset = null;
     [SerializeField] private Vector3 thirdPersonOffset = new Vector3(0, 0, 0);
     [SerializeField] private Vector3 firstPersonOffset = new Vector3(0, 0, 0);
     [SerializeField] private float cameraDrag = 1;
@@ -44,15 +45,31 @@ public class CameraController : MonoBehaviour
 
             mainCamera.SetActive(false);
             mainCamera = (mainCamera == tpCamera) ? fpCamera : tpCamera;
+            Canvas hudCanvas = GameObject.Find("HUD").GetComponent<Canvas>();
+            hudCanvas.worldCamera = GetMainCamera();
+            hudCanvas.planeDistance = (mainCamera == tpCamera) ? 10 : 0.5f;
+
         }
 
         mainCamera.SetActive(true);
 
     }
-    public void ShakeCamera()
+
+    public void OnPlayerHit()
     {
-        Shaker cameraShaker = GetComponentInChildren<Shaker>();
+        Shaker cameraShaker = GetMainCamera().GetComponent<Shaker>();
+
+        cameraShaker.Shake(playerHitShakePreset);
+
+    }
+
+    public void OnEnemyHit()
+    {
+
+        Shaker cameraShaker = GetMainCamera().GetComponent<Shaker>();
+
         cameraShaker.Shake(enemyDeathShakePreset);
+
     }
 
     public void UpdateCamerasTransform()

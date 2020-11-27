@@ -18,7 +18,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8001695967956767025
 Transform:
   m_ObjectHideFlags: 0
@@ -78,6 +78,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentPlanet: {fileID: 0}
   teamNumber: 1
+  maxHealth: 0
   health: 5
   enemyHeight: 2.5
   enemyRadius: 1.2
@@ -86,6 +87,7 @@ MonoBehaviour:
   target: {fileID: 0}
   deathParticles: {fileID: 8752836292449902751, guid: 31fa6b94c1d61254aa77117d6ccb2aa0, type: 3}
   speed: 20
+  knockback: 1000
 --- !u!1001 &8001695969353109466
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -44,6 +44,9 @@ public class PlayerController : LivingEntity, IAttacker
     // Start is called before the first frame update
     void Start()
     {
+
+        base.Start();
+
         shootingDelta = maxShootingDelta;
         timer = maxShootingDelta;
         _rigidbody = GetComponent<Rigidbody>();
@@ -77,6 +80,25 @@ public class PlayerController : LivingEntity, IAttacker
     private void FixedUpdate()
     {
         handleInput();
+    }
+
+    void Update()
+    {
+
+        Vector3 gravityVector = currentPlanet.transform.position -  transform.position;
+        Vector3 finalPosition = -gravityVector.normalized * ((currentPlanet.transform.localScale.x / 2) + 2) + currentPlanet.transform.position;
+
+        gameObject.transform.position = finalPosition;
+
+    }
+
+    public override bool TakeHit(int damage)
+    {
+        base.TakeHit(damage);
+
+        cameraController.OnPlayerHit();
+
+        return false;
     }
 
     private void computeWeaponState()
@@ -171,7 +193,7 @@ public class PlayerController : LivingEntity, IAttacker
 
     public void OnKill(LivingEntity other)
     {
-        GameObject.Find("CameraController").GetComponent<CameraController>().ShakeCamera();
+        GameObject.Find("CameraController").GetComponent<CameraController>().OnEnemyHit();
     }
 
     public bool IsHostileTo(WorldEntity other)

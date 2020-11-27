@@ -8,8 +8,9 @@ public class CubeEnemy : AIEnemy, IAttacker
 {
     [SerializeField] private ParticleSystem deathParticles = null;
     [SerializeField] private float speed = 1;
+    [SerializeField] private float knockback = 1f;
     private Rigidbody _rigidbody;
-
+  
     void Start()
     {
         health = 5;
@@ -18,7 +19,8 @@ public class CubeEnemy : AIEnemy, IAttacker
 
     public void OnHit(LivingEntity other)
     {
-
+        Vector3 force = (other.transform.position - transform.position).normalized * knockback;
+        other.gameObject.GetComponent<Rigidbody>().AddForce(force);
     }
 
     public void OnKill(LivingEntity other)

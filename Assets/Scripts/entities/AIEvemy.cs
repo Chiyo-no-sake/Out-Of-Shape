@@ -38,9 +38,9 @@ public abstract class AIEnemy : Enemy
     
     protected void LateUpdate()
     {
-        if (path == null) return;
+        if (path == null || path.Count == 0) return;
         if(!alreadySimplified)
-            path = GetSimplyfiedPath(path);
+            path = GetSimplifiedPath(path);
 
         //only for debug
         List < Vector3 > vertices = new List<Vector3>();
@@ -59,8 +59,13 @@ public abstract class AIEnemy : Enemy
 
     public Node GetNextPathPoint()
     {
-        if (pathStepIndex == this.path.Count) return new Node(null, target.transform.position, 0);
-        return this.path.ElementAt(pathStepIndex);
+        if(path != null)
+        {
+            if (pathStepIndex == this.path.Count) return new Node(null, target.transform.position, 0);
+            return this.path.ElementAt(pathStepIndex);
+        }
+
+        return new Node(null, navSurface.GetNearestVertex(target), 0);
     }
 
     public void UpdateNextPathPoint()
@@ -79,7 +84,7 @@ public abstract class AIEnemy : Enemy
 
 
     //delay between fresh starts of the path-seeking algorithm
-    private IEnumerator BebignAStar()
+    private IEnumerator BeginAStar()
     {
         updateNavigationPath = false;
 
@@ -220,7 +225,7 @@ public abstract class AIEnemy : Enemy
         return cheapest;
     }
 
-    private List<Node> GetSimplyfiedPath(List<Node> path)
+    private List<Node> GetSimplifiedPath(List<Node> path)
     {
         // assign a first node s, and another node n
         // put s into the new path
@@ -229,7 +234,7 @@ public abstract class AIEnemy : Enemy
         // if there is a collision, put the last valid n into the list
         // the put s = lastValid_n and n = s.next
 
-        if (path == null) return null;
+        if (path == null || path.Count == 0) return null;
 
         List<Node> simplified = new List<Node>();
         int sIndex = 0, nIndex = 1, lastOkIndex = 0;
@@ -285,7 +290,7 @@ public abstract class AIEnemy : Enemy
 
             if (updateNavigationPath && !isComputing() && navSurface.IsUpdatedCorrectly())
             {
-                StartCoroutine(BebignAStar());
+                StartCoroutine(BeginAStar());
             }
         }
 
