@@ -479,7 +479,7 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0.679
+  m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -548,6 +548,7 @@ GameObject:
   - component: {fileID: 987666520}
   - component: {fileID: 987666519}
   - component: {fileID: 987666518}
+  - component: {fileID: 987666522}
   m_Layer: 5
   m_Name: HUD
   m_TagString: Untagged
@@ -635,6 +636,37 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &987666522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 987666517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 019c76142ff0f844c8a84183193fbc2b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 1675061654}
+--- !u!1 &1079068868 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7071429435238336657, guid: 2f18c995cd261b246b26a56076988d27, type: 3}
+  m_PrefabInstance: {fileID: 1231099435101189412}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1079068872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1079068868}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1697a0132719bae458729c9e99c0c716, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  addToGlobalShakers: 0
 --- !u!1001 &1317779958
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1272,6 +1304,10 @@ PrefabInstance:
       propertyPath: boundGameObjectFP
       value: 
       objectReference: {fileID: 934240226}
+    - target: {fileID: 1231099434490959625, guid: 2f18c995cd261b246b26a56076988d27, type: 3}
+      propertyPath: playerHitShakePreset
+      value: 
+      objectReference: {fileID: 11400000, guid: c1c93d75037d4c54aacafa990989222b, type: 2}
     - target: {fileID: 1231099434490959631, guid: 2f18c995cd261b246b26a56076988d27, type: 3}
       propertyPath: m_Name
       value: CameraController
@@ -1424,6 +1460,10 @@ PrefabInstance:
       propertyPath: health
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4793606147293557372, guid: 3b1e172eee6be8a42a0933c35788aa5c, type: 3}
+      propertyPath: maxHealth
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 4793606147293557373, guid: 3b1e172eee6be8a42a0933c35788aa5c, type: 3}
       propertyPath: m_Name
       value: Player
@@ -1441,6 +1481,10 @@ PrefabInstance:
       propertyPath: target
       value: 
       objectReference: {fileID: 1675061654}
+    - target: {fileID: 1748419643, guid: e0a0664b94b49624a9d32cf86283b083, type: 3}
+      propertyPath: knockback
+      value: 30000
+      objectReference: {fileID: 0}
     - target: {fileID: 8001695967956767025, guid: e0a0664b94b49624a9d32cf86283b083, type: 3}
       propertyPath: m_LocalPosition.x
       value: -24.4

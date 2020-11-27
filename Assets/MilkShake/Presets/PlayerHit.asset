@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 955f6c9be248dc249a31bad716cc6963, type: 3}
-  m_Name: New Shake Preset
+  m_Name: PlayerHit
   m_EditorClassIdentifier: 
   shakeType: 0
-  strength: 0
-  roughness: 0
+  strength: 0.6
+  roughness: 10
   fadeIn: 0
-  fadeOut: 0
-  positionInfluence: {x: 0, y: 0, z: 0}
-  rotationInfluence: {x: 0, y: 0, z: 0}
+  fadeOut: 0.55
+  positionInfluence: {x: 2, y: 0.5, z: 2}
+  rotationInfluence: {x: 20, y: 10, z: 20}
