@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System;
 using UnityEngine;
-using System.Linq;
 using System.Threading.Tasks;
 
 
@@ -62,7 +61,7 @@ public abstract class AIEnemy : Enemy
         if(path != null)
         {
             if (pathStepIndex == this.path.Count) return new Node(null, target.transform.position, 0);
-            return this.path.ElementAt(pathStepIndex);
+            return this.path[pathStepIndex];
         }
 
         return new Node(null, navSurface.GetNearestVertex(target), 0);
@@ -70,10 +69,10 @@ public abstract class AIEnemy : Enemy
 
     public void UpdateNextPathPoint()
     {
-        Vector3 currVertex = navSurface.GetNearestVertex(this.gameObject);
+        float maxDistanceToPass = 3f;
         if (path == null) return;
-        if (path.Count() >= pathStepIndex) return;
-        if (path.ElementAt(pathStepIndex).vertex == currVertex)
+        if (pathStepIndex >= path.Count) return;
+        if (Vector3.Distance(path[pathStepIndex].vertex, transform.position) <= maxDistanceToPass)
             ++pathStepIndex;
     }
 
@@ -86,30 +85,36 @@ public abstract class AIEnemy : Enemy
     //delay between fresh starts of the path-seeking algorithm
     private IEnumerator BeginAStar()
     {
+        //Vector3 first = navSurface.GetNearestVertex(this.gameObject);
+        //Vector3 last = navSurface.GetNearestVertex(target);
+
+        MeshComputer.SetVertices(navSurface.GetVertices());
+
+        Vector3 first;
+        Vector3 last;
+
+        Vector3 startPosition = gameObject.transform.position;
+        Vector4 targetPostition = target.transform.position;
+
         updateNavigationPath = false;
-
-        Vector3 first = navSurface.GetNearestVertex(this.gameObject);
-        Vector3 last = navSurface.GetNearestVertex(target);
-
-        if (first != null && last != null)
+        Task.Factory.StartNew(() =>
         {
-            Vector3 initialPos = first;
-            Vector3 endPos = last;
-            float initDistance = Vector3.Distance(initialPos, endPos);
+            first = MeshComputer.GetNearestVertexTo(startPosition).Value;
+            last = MeshComputer.GetNearestVertexTo(targetPostition).Value;
 
-            Node start = new Node(null, first, initDistance);
-            Node end = new Node(null, last, 0);
-
-            Task.Factory.StartNew(() => {
+            float initDistance = Vector3.Distance(first, last);
+            if (first != null && last != null)
+            {
+                Node start = new Node(null, first, initDistance);
+                Node end = new Node(null, last, 0);
                 computing = true;
                 path = CreatePath(start, end);
                 computing = false;
                 alreadySimplified = false;
                 pathStepIndex = 0;
-            });
-        }
+            }
+        });
 
-        
         yield return new WaitForSeconds(this.refreshDelay);
         updateNavigationPath = true;
         
@@ -133,7 +138,7 @@ public abstract class AIEnemy : Enemy
 
         for(int i=path.Count-1; i >= 0; i--)
         {
-            finalPath.Add(path.ElementAt(i));
+            finalPath.Add(path[i]);
         }
 
         return finalPath;
@@ -247,24 +252,24 @@ public abstract class AIEnemy : Enemy
 
         simplified.Add(path[0]);
         
-        while (!simplified.Contains(path.Last()))
+        while (!simplified.Contains(path[path.Count-1]))
         {
-            if (nIndex >= path.Count())
+            if (nIndex >= path.Count)
             {
                 simplified.Add(path[lastOkIndex]);
                 continue;
             }
 
-            Vector3 vertexNormal = (path.ElementAt(sIndex).vertex - navSurface.transform.position).normalized;
-            Vector3 capsuleP1 = path.ElementAt(sIndex).vertex + vertexNormal * capsuleStartOffset;
-            Vector3 capsuleP2 = path.ElementAt(sIndex).vertex + vertexNormal * capsuleEndOffset;
-            Vector3 dir = path.ElementAt(nIndex).vertex - path.ElementAt(sIndex).vertex;
-            float dist = Vector3.Distance(path.ElementAt(sIndex).vertex, path.ElementAt(nIndex).vertex);
+            Vector3 vertexNormal = (path[sIndex].vertex - navSurface.transform.position).normalized;
+            Vector3 capsuleP1 = path[sIndex].vertex + vertexNormal * capsuleStartOffset;
+            Vector3 capsuleP2 = path[sIndex].vertex + vertexNormal * capsuleEndOffset;
+            Vector3 dir = path[nIndex].vertex - path[sIndex].vertex;
+            float dist = Vector3.Distance(path[sIndex].vertex, path[nIndex].vertex);
 
             if (collapsed >= maxNodesSimplified || Physics.CapsuleCast(capsuleP1, capsuleP2, enemyRadius, dir, dist, mask))
             {
                 // cannot simplify
-                simplified.Add(path.ElementAt(lastOkIndex));
+                simplified.Add(path[lastOkIndex]);
                 sIndex = lastOkIndex;
                 collapsed = 0;
             }

@@ -23,8 +23,9 @@ public class SphericalNavMesh : MonoBehaviour
 
     void Update()
     {
+        if (updatedCorrectly) return;
         if (updateTimer == 0) UpdateTraversability();
-        if (updateTimer > 5 && !updatedCorrectly)
+        if (updateTimer > 5)
         {
             updatedCorrectly = true;
             UpdateTraversability();
@@ -49,6 +50,11 @@ public class SphericalNavMesh : MonoBehaviour
         }
 
         return nearest;
+    }
+
+    public Vector3[] GetVertices()
+    {
+        return vertices;
     }
 
     public Vector3 GetVertex(int index)
