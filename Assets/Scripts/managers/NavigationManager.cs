@@ -8,6 +8,7 @@ public class NavigationManager : IManager
     public void Init()
     {
         navMesh = UnityEngine.GameObject.FindGameObjectWithTag("Ground").GetComponent<SphericalNavMesh>();
+        navMesh.ComputeMeshData();
     }
 
     public bool IsReady()

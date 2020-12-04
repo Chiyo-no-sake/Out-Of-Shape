@@ -18,7 +18,7 @@ public class SphericalNavMesh : MonoBehaviour
 
     void Start()
     {
-        ComputeMeshData();
+
     }
 
     void Update()
@@ -82,7 +82,7 @@ public class SphericalNavMesh : MonoBehaviour
         }
     }
 
-    private void ComputeMeshData()
+    public void ComputeMeshData()
     {
         // setup triangles array and NavPoint array sizes
         int[] triangles = SphericalMesh.triangles;
