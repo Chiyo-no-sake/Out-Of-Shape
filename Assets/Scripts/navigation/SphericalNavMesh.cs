@@ -62,6 +62,11 @@ public class SphericalNavMesh : MonoBehaviour
         return vertices[index];
     }
 
+    public bool FinishedSetup()
+    {
+        return updateTimer >= 5 && IsUpdatedCorrectly();
+    }
+
     public bool IsUpdatedCorrectly()
     {
         return this.updatedCorrectly;

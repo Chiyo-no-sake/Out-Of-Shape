@@ -8,11 +8,11 @@ public class EnemySpawnController : MonoBehaviour
 {
     private bool started = false;
     private List<EnemySpawner> spawners;
-    private List<Enemy> spawned;
+    private List<GameObject> spawned;
 
     public void Start()
     {
-        spawned = new List<Enemy>();
+        spawned = new List<GameObject>();
         spawners = new List<EnemySpawner>();
 
         GameObject[] found = GameObject.FindGameObjectsWithTag("EnemySpawner");
@@ -49,38 +49,21 @@ public class EnemySpawnController : MonoBehaviour
     public void StartSpawning(int roundNumber)
     {
         started = true;
-        List<Enemy> toSpawn = GenerateEnemies(roundNumber);
-        StartCoroutine(SpawnRoutine(toSpawn));
+        StartCoroutine(SpawnRoutine(roundNumber*2));
     }
 
-    private IEnumerator SpawnRoutine(List<Enemy> toSpawn)
+    private IEnumerator SpawnRoutine(int toSpawn)
     {
-        int i = 0;
-        foreach (var enemy in toSpawn)
+        for (int i = 0; i < toSpawn;)
         {
-            int targetSpawnerId = i++ % spawners.Count;
+            int targetSpawnerId = i % spawners.Count;
             if (spawners[targetSpawnerId].IsFree())
             {
-                spawned.Add(enemy);
-                spawners[targetSpawnerId].Spawn(enemy);
-
+                spawned.Add(spawners[targetSpawnerId].Spawn());
+                i++;
             }
 
             yield return new WaitForEndOfFrame();
         }
-    }
-
-    private List<Enemy> GenerateEnemies(int round)
-    {
-        //TODO
-        List<Enemy> toRet = new List<Enemy>();
-        toRet.Add(new CubeEnemy());
-        toRet.Add(new CubeEnemy());
-        toRet.Add(new CubeEnemy());
-
-        var rand = new System.Random();
-        var randomList = toRet.OrderBy(x => rand.Next()).ToList();
-
-        return toRet;
     }
 }

@@ -17,7 +17,7 @@ public class RoundManager : IManager
 
     public void Init()
     {
-        _currentRound = 0;
+        _currentRound = 1;
         _spawnController = UnityEngine.GameObject.FindGameObjectWithTag("SpawnController").GetComponent<EnemySpawnController>();    
     }
 
@@ -29,7 +29,6 @@ public class RoundManager : IManager
     public void OnSetupComplete()
     {
         _spawnController.StartSpawning(_currentRound);
-
     }
 
     public void AdvanceRound()

@@ -12,6 +12,8 @@ TagManager:
   - CameraController
   - FPCamera
   - TPCamera
+  - EnemySpawner
+  - SpawnController
   layers:
   - Default
   - TransparentFX

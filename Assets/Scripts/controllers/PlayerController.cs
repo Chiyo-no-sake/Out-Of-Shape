@@ -167,6 +167,7 @@ public class PlayerController : LivingEntity, IAttacker
 
     public void Attack()
     {
+        AudioManager.GetInstance().Play(AudioManager.AudioType.PLAYER_SHOOT);
         GameObject projectile = Instantiate(projectileType);
         ProjectileController pc = projectile.GetComponent<ProjectileController>();
 
@@ -183,16 +184,17 @@ public class PlayerController : LivingEntity, IAttacker
 
     public void OnHit(LivingEntity other)
     {
-
+        AudioManager.GetInstance().Play(AudioManager.AudioType.ENEMY_HURT);
     }
 
     public override void DestroySelf()
     {
-        Debug.Log("TODO: sei morto");
+        AudioManager.GetInstance().Play(AudioManager.AudioType.PLAYER_ENEMY_DIE);
     }
 
     public void OnKill(LivingEntity other)
     {
+        AudioManager.GetInstance().Play(AudioManager.AudioType.PLAYER_ENEMY_DIE);
         GameObject.Find("CameraController").GetComponent<CameraController>().OnEnemyHit();
     }
 

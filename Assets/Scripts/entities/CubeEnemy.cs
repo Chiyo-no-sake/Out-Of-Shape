@@ -48,7 +48,6 @@ public class CubeEnemy : AIEnemy, IAttacker
 
     protected override void StepTowardsTarget()
     {
-        if(GetPath() == null) return;
         Node target = GetNextPathPoint();
         Vector3 gravityDir = (currentPlanet.transform.position - transform.position).normalized;
         DoStep(target.vertex, gravityDir);

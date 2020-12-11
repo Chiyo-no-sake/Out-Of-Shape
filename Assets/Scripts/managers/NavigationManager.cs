@@ -22,7 +22,7 @@ public class NavigationManager : IManager
 
     public bool IsReady()
     {
-        return navMesh.IsUpdatedCorrectly();
+        return navMesh.FinishedSetup();
     }
 
     public void OnSetupComplete()

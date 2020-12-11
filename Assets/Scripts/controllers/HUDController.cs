@@ -7,12 +7,13 @@ public class HUDController : MonoBehaviour
 {
 
     private Slider healthbarSlider;
+    private Text roundText;
     [SerializeField] private GameObject player;
 
     // Start is called before the first frame update
     void Start()
     {
-
+        roundText = gameObject.GetComponentInChildren<Text>();
         healthbarSlider = gameObject.GetComponentInChildren<Slider>();
         healthbarSlider.maxValue = player.GetComponent<PlayerController>().GetMaxHealth();
     }
@@ -22,10 +23,11 @@ public class HUDController : MonoBehaviour
     {
         if(player != null)
         {
-
             int currentHealth = player.GetComponent<PlayerController>().GetCurrentHealth();
-
             healthbarSlider.value = Mathf.Lerp(healthbarSlider.value, currentHealth, Time.deltaTime * 3);
         }
+
+        int rn = RoundManager.GetInstance().GetRoundNum();
+        roundText.text = "Round " + rn;
     }
 }

@@ -64,12 +64,12 @@ public abstract class AIEnemy : Enemy
             return this.path[pathStepIndex];
         }
 
-        return new Node(null, navSurface.GetNearestVertex(target), 0);
+        return new Node(null, target.transform.position, 0);
     }
 
     public void UpdateNextPathPoint()
     {
-        float maxDistanceToPass = 3f;
+        float maxDistanceToPass = 5f;
         if (path == null) return;
         if (pathStepIndex >= path.Count) return;
         if (Vector3.Distance(path[pathStepIndex].vertex, transform.position) <= maxDistanceToPass)
@@ -309,6 +309,11 @@ public abstract class AIEnemy : Enemy
     protected void OnCollisionExit(Collision collision)
     {
         
+    }
+
+    public void SetTarget(GameObject t)
+    {
+        this.target = t;
     }
 
 }

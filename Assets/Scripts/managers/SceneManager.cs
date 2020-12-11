@@ -6,15 +6,21 @@ public class SceneManager : MonoBehaviour
 {
 
     private IManager __navManager;
+    private IManager __roundManager;
+    private IManager __audioManager;
 
     private void Awake()
     {
 
         List<IManager> managers = new List<IManager>();
 
-        __navManager = new NavigationManager();
+        __audioManager = AudioManager.GetInstance();
+        __navManager = NavigationManager.GetInstance();
+        __roundManager = RoundManager.GetInstance();
 
         managers.Add(__navManager);
+        managers.Add(__roundManager);
+        managers.Add(__audioManager);
 
         StartCoroutine("InitManagers", managers);
 
@@ -59,7 +65,10 @@ public class SceneManager : MonoBehaviour
 
         }
 
-
+        foreach(IManager manager in managers)
+        {
+            manager.OnSetupComplete();
+        }
     }
 
 }
