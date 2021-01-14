@@ -71,4 +71,9 @@ public class SceneManager : MonoBehaviour
         }
     }
 
+    public void ToDeathScreen()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("DeathScreen", UnityEngine.SceneManagement.LoadSceneMode.Single);
+    }
+
 }

@@ -189,7 +189,10 @@ public class PlayerController : LivingEntity, IAttacker
 
     public override void DestroySelf()
     {
-        AudioManager.GetInstance().Play(AudioManager.AudioType.PLAYER_ENEMY_DIE);
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals("Level1"))
+        {
+            GameObject.FindGameObjectWithTag("SceneManager").GetComponent<SceneManager>().ToDeathScreen();
+        }
     }
 
     public void OnKill(LivingEntity other)

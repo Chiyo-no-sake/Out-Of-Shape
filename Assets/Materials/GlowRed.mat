@@ -91,7 +91,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - Color_3E6D8F9D: {r: 1, g: 0.038367633, b: 0, a: 0}
-    - Color_548374DF: {r: 1, g: 1, b: 1, a: 0}
+    - Color_548374DF: {r: 1, g: 0.5235849, b: 0.5235849, a: 0}
     - Color_ADFA812F: {r: 1, g: 0, b: 0.07692289, a: 0}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 0, b: 0, a: 1}

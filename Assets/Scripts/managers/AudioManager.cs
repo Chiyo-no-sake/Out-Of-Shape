@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 public class AudioManager : IManager {
 
@@ -6,6 +7,7 @@ public class AudioManager : IManager {
     private AudioClip _enemy_hurt;
     private AudioClip _background_theme;
     private AudioSource _source;
+    private GameObject _sourceGO;
 
     private static AudioManager instance;
 
@@ -25,7 +27,8 @@ public class AudioManager : IManager {
 
     public void Init(){
 
-        _source = GameObject.Find("AudioSource").GetComponent<AudioSource>() as AudioSource;
+        _sourceGO = GameObject.Find("AudioSource");
+        _source = _sourceGO.GetComponent<AudioSource>();
         _player_shoot = Resources.Load<AudioClip>("sounds/player_laser_shoot");
         _enemy_hurt = Resources.Load<AudioClip>("sounds/enemy_hurt");
         _background_theme = Resources.Load<AudioClip>("sounds/background_theme_play");
@@ -114,4 +117,13 @@ public class AudioManager : IManager {
 
     }
 
+    public AudioSource GetSource()
+    {
+        return _source;
+    }
+
+    public GameObject GetSourceGO()
+    {
+        return _sourceGO;
+    }
 }

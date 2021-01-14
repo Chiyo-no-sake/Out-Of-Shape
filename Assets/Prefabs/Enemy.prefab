@@ -87,7 +87,7 @@ MonoBehaviour:
   target: {fileID: 0}
   deathParticles: {fileID: 8752836292449902751, guid: 31fa6b94c1d61254aa77117d6ccb2aa0, type: 3}
   speed: 20
-  knockback: 1000
+  knockback: 40000
 --- !u!1001 &8001695969353109466
 PrefabInstance:
   m_ObjectHideFlags: 0

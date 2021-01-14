@@ -14,6 +14,9 @@ TagManager:
   - TPCamera
   - EnemySpawner
   - SpawnController
+  - SceneManager
+  - AudioController
+  - roundText
   layers:
   - Default
   - TransparentFX

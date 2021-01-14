@@ -21,11 +21,13 @@ public class CubeEnemy : AIEnemy, IAttacker
     {
         Vector3 force = (other.transform.position - transform.position).normalized * knockback;
         other.gameObject.GetComponent<Rigidbody>().AddForce(force);
+        AudioManager.GetInstance().Play(AudioManager.AudioType.PLAYER_ENEMY_DIE);
+
     }
 
     public void OnKill(LivingEntity other)
     {
-
+        AudioManager.GetInstance().Play(AudioManager.AudioType.PLAYER_ENEMY_DIE);
     }
 
     public void Attack() { }
