@@ -1,4 +1,4 @@
-# GameDev
+# Out Of Shape
 Project created for the game development course taken in SUPSI.
 The main idea for the game is to have a spherical world where the player can move, with gravity towards its center.
 While on the planet, the player (that is a sphere like the planet) will be attacked by cubes: stranges shapes that are attacking your planet.
